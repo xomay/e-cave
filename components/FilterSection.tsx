@@ -1,6 +1,7 @@
-import { act, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { useContext, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { RegionsContext } from './Contexts';
 
 const filterButtons = ['Mets', 'Région', 'Cépage', 'Couleur'];
 
@@ -24,8 +25,22 @@ type Couleur = {
     nom: string,
 }
 
+/*
+export const RegionsContext = createContext<string[]>([]);
+export const MetsContext = createContext<string[]>([]);
+export const CepagesContext = createContext<string[]>([]);
+export const CouleursContext = createContext<string[]>([]);
+*/
 export default function FilterSection(props: {regions: Region[], mets: Mets[], cepages: Cepage[], couleurs: Couleur[]}) {
     const [activeBtn, setActiveBtn] = useState<string>('Mets')
+
+    const Regions = useContext(RegionsContext);
+    /*const selectedMets = useContext(MetsContext);
+    const selectedCepages = useContext(CepagesContext);
+    const selectedCouleurs = useContext(CouleursContext);*/
+
+    const selectedRegions = Regions.selectedFilters;
+    const setSelectedRegions = Regions.setSelectedFilters;
 
     const regions = props.regions;
     const mets = props.mets;
@@ -50,13 +65,14 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
         setActiveBtn(button);
     }
 
-    console.log("filtersss = ",filtersss.filter((filtre) => filtre.filter === activeBtn).map((el) => el.value.map((el) => el.nom)));  
+    //console.log("filtersss = ",filtersss.filter((filtre) => filtre.filter === activeBtn).map((el) => el.value.map((el) => el.nom)));  
     
     // État pour les filtres sélectionnés
-    const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+    /*const [selectedRegions, setSelectedRegions] = useState<string[]>([]);*/
     const [selectedCouleurs, setSelectedCouleurs] = useState<string[]>([]);
     const [selectedCepages, setSelectedCepages] = useState<string[]>([]);
     const [selectedMets, setSelectedMets] = useState<string[]>([]);
+    
 
     // Fonction pour gérer la sélection des filtres
     const toggleFilter = (filterType: string, value: string) => {
@@ -88,6 +104,7 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
 
 
     return (
+        <RegionsContext.Provider value={{selectedFilters: selectedRegions, setSelectedFilters: setSelectedRegions}}>
         <View style={styles.container}>
             {/* Title */}
             <Text style={styles.title}>Filtres</Text>
@@ -108,28 +125,28 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
                 //.filter((filtre) => filtre === activeBtn)
                 .map((card, index) => (
                     <TouchableOpacity key={index} style={styles.card}>
-                        <Text style={styles.cardText}>{card.title}</Text>
+                    <Text style={styles.cardText}>{card.title}</Text>
                     </TouchableOpacity>
-                ))}
-            </ScrollView>*/}
+                    ))}
+                    </ScrollView>*/}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cardScroll}>
                 {filtersss.
                 filter((filtre) => filtre.filter === activeBtn)
                 .map((el) => 
                     el.value.map((el, index) =>
                         <TouchableOpacity key={index} 
-                        style={[styles.card, { backgroundColor: (selectedRegions.includes(el.nom) 
-                            || selectedCepages.includes(el.nom) 
-                            || selectedCouleurs.includes(el.nom)
-                            || selectedMets.includes(el.nom)
-                        )? '#6cbfd4' : '#ebebeb'}]}
-                        onPress={() => toggleFilter(activeBtn, el.nom)}
-                        >
+                style={[styles.card, { backgroundColor: (selectedRegions.includes(el.nom) 
+                    || selectedCepages.includes(el.nom) 
+                    || selectedCouleurs.includes(el.nom)
+                    || selectedMets.includes(el.nom)
+                )? '#6cbfd4' : '#ebebeb'}]}
+                onPress={() => toggleFilter(activeBtn, el.nom)}
+                >
                             <Text style={styles.cardText}>{el.nom}</Text>
                         </TouchableOpacity>
                         ))}
             </ScrollView>
-            <View>
+            {/*<View>
                 {selectedRegions.map((region, index) => (
                     <Text key={index}>{region}</Text>
                 ))}
@@ -142,9 +159,10 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
                 {selectedMets.map((region, index) => (
                     <Text key={index}>{region}</Text>
                 ))}
-            </View>
+            </View>*/}
             {/*renderFilterContent()*/}
         </View>
+        </RegionsContext.Provider>
     );
 };
 
@@ -188,3 +206,4 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
 });
+

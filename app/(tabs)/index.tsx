@@ -1,12 +1,16 @@
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View, TouchableOpacity } from "react-native";
 
 //const PlaceHolderImage = require('@/assets/images/wine-bottle.png');
 import FilterSection from "@/components/FilterSection";
 import WineSection from "@/components/WineSection";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from 'expo-sqlite';
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import {FontAwesome} from '@expo/vector-icons';
+import { router } from "expo-router";
+
+import { RegionsContext, CepagesContext, CouleursContext, MetsContext } from "@/components/Contexts";
 
 
 
@@ -83,7 +87,14 @@ export default function Index() {
             loadCouleurs();
         }, [])
     );
-  return (  
+
+    // État pour les filtres sélectionnés
+    const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+    const [selectedCouleurs, setSelectedCouleurs] = useState<string[]>([]);
+    const [selectedCepages, setSelectedCepages] = useState<string[]>([]);
+    const [selectedMets, setSelectedMets] = useState<string[]>([]);
+    
+    return (  
     <SafeAreaView style={{
         flex: 1,
     }}>
@@ -94,6 +105,14 @@ export default function Index() {
         }}>
             <Text>Bonjour Laurent</Text>
             <Text>Bienvenue dans votre cave</Text>
+            <TouchableOpacity style={{
+                position: "absolute",
+                right: 20,
+                bottom: 20,
+            }}
+            onPress={() => router.push('../editPage')}>
+                <FontAwesome size={40} name="plus-circle"/>
+            </TouchableOpacity>
         </View>
         
         <ScrollView
@@ -104,8 +123,12 @@ export default function Index() {
         }}
         
         >
+            <RegionsContext.Provider 
+            value={{selectedFilters: selectedRegions, setSelectedFilters: setSelectedRegions}}>
+
             <FilterSection regions={regions} mets={mets} cepages={cepages} couleurs={couleurs}/>
             <WineSection data={data}/>
+            </RegionsContext.Provider>
         </ScrollView>
 
     </SafeAreaView>

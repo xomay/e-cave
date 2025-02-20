@@ -1,6 +1,6 @@
-import React from 'react';
-import {ScrollView,View,Text,Image,TouchableOpacity,StyleSheet,Dimensions,} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useContext } from 'react';
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { router, Stack } from 'expo-router';
 
 /*interface Wine {
 id: string;
@@ -10,7 +10,9 @@ region: string;
 grape: string;
 }*/
 
-type Wine = {
+import { CepagesContext, CouleursContext, MetsContext, RegionsContext } from './Contexts';
+
+type WineZ = {
     domaine: number,
     appellation: number,
     region: number,
@@ -19,13 +21,23 @@ type Wine = {
     couleur: number,
     cepage: number,
 }
-/*
+type Wine = {
+    id: number,
+    domaine: string,
+    appellation: string,
+    region: string,
+    millesime: number,
+    quantite: number,
+    couleur: string,
+    cepage: string,
+}
+
 const wines: Wine[] = [
 {
     id: 1,
     domaine: 'Domaine A',
     appellation: '',
-    region: 'Région A',
+    region: 'Bordeaux',
     cepage: 'Cepage A',
     millesime: 2019,
     quantite: 6,
@@ -42,34 +54,46 @@ const wines: Wine[] = [
     appellation: '',
 },
 // Ajoutez d'autres vins au besoin
-];*/
+];
 
-export default function WineSection(props: { data: Wine[] }) {
-return (
-    <View>
-        <Text style={styles.sectionTitle}>Les Vins</Text>
+export default function WineSection(props: { data: WineZ[] }) {
+    const {selectedFilters: selectedRegions, setSelectedFilters: setSelectedRegions} = useContext(RegionsContext);
+    const selectedCouleurs = useContext(CouleursContext);
+    const selectedCepages = useContext(CepagesContext);
+    const selectedMets = useContext(MetsContext);
+    const filteredWines = wines.filter(wine => {
+        const regionMatch = selectedRegions.length === 0 || selectedRegions.includes(wine.region);
+        const couleurMatch = selectedCouleurs.length === 0 || selectedCouleurs.includes(wine.couleur);
+        const cepageMatch = selectedCepages.length === 0 || selectedCepages.includes(wine.cepage);
+        return regionMatch && couleurMatch && cepageMatch;
+    });
 
-        <View style={styles.container}>
-            
-            {props.data.map((wine, index) => (
-                <TouchableOpacity
-                    key={wine.millesime}
+    return (
+                        
+        <View>
+            <Text style={styles.sectionTitle}>Les Vins</Text>
+
+            <View style={styles.container}>
+                
+                {filteredWines.map((wine, index) => (
+                    <TouchableOpacity
+                    key={index}
                     style={[
                         styles.card,
                         // Ajoute une marge droite pour la première carte d'une ligne
                         { marginRight: index % 2 === 0 ? 10 : 0 },
-                    ]}
-                    //onPress={() => console.log(`Clicked on ${wine.domain}`)}
-                >
-                    <Image source={{ uri: 'https://via.placeholder.com/150' }} style={styles.image} />
-                    <Text style={styles.title}>{wine.domaine}</Text>
-                    <Text style={styles.text}>{wine.region}</Text>
-                    <Text style={styles.text}>{wine.cepage}</Text>
-                </TouchableOpacity>
-            ))}
+                        ]}
+                        onPress={() => router.push(`../wineDetails?id=${wine.id}`)}
+                    >
+                        <Image source={{ uri: 'https://via.placeholder.com/150' }} style={styles.image} />
+                        <Text style={styles.title}>{wine.domaine}</Text>
+                        <Text style={styles.text}>{wine.region}</Text>
+                        <Text style={styles.text}>{wine.cepage}</Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
         </View>
-    </View>
-);
+    );
 };
 
 const cardWidth = (Dimensions.get('window').width - 30) / 2;

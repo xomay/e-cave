@@ -12,6 +12,8 @@ export default function RootLayout() {
     <SQLiteProvider databaseName="db_vins.db" assetSource={{ assetId: require('../assets/db_vins.db') }}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="wineDetails" options={{ presentation: "modal" }} />
+        <Stack.Screen name="editPage" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found"/>
       </Stack>
     </SQLiteProvider>
