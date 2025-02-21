@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { SQLiteDatabase, SQLiteProvider } from 'expo-sqlite';
+import { SQLiteProvider } from 'expo-sqlite';
 
 
 export default function RootLayout() {
@@ -11,9 +11,10 @@ export default function RootLayout() {
     //onInit={createDbIfNeeded} is a callback that will be called when the database is opened
     <SQLiteProvider databaseName="db_vins.db" assetSource={{ assetId: require('../assets/db_vins.db') }}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="wineDetails" options={{ presentation: "modal" }} />
-        <Stack.Screen name="editPage" options={{ headerShown: false }} />
+        {/*<Stack.Screen name="(tabs)" options={{ headerShown: false }} />*/}
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="wineDetails" options={{ presentation: "modal", headerShown: false }} />
+        <Stack.Screen name="editPage" options={{ headerShown: false}} />
         <Stack.Screen name="+not-found"/>
       </Stack>
     </SQLiteProvider>

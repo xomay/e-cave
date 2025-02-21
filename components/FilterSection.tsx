@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { RegionsContext } from './Contexts';
+import { RegionsContext, MetsContext, CepagesContext, CouleursContext } from './Contexts';
 
 const filterButtons = ['Mets', 'Région', 'Cépage', 'Couleur'];
 
@@ -35,12 +35,18 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
     const [activeBtn, setActiveBtn] = useState<string>('Mets')
 
     const Regions = useContext(RegionsContext);
-    /*const selectedMets = useContext(MetsContext);
-    const selectedCepages = useContext(CepagesContext);
-    const selectedCouleurs = useContext(CouleursContext);*/
+    const Mets = useContext(MetsContext);
+    const Cepages = useContext(CepagesContext);
+    const Couleurs = useContext(CouleursContext);
 
     const selectedRegions = Regions.selectedFilters;
     const setSelectedRegions = Regions.setSelectedFilters;
+    const selectedMets = Mets.selectedFilters;
+    const setSelectedMets = Mets.setSelectedFilters;
+    const selectedCepages = Cepages.selectedFilters;
+    const setSelectedCepages = Cepages.setSelectedFilters;
+    const selectedCouleurs = Couleurs.selectedFilters;
+    const setSelectedCouleurs = Couleurs.setSelectedFilters;
 
     const regions = props.regions;
     const mets = props.mets;
@@ -68,10 +74,10 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
     //console.log("filtersss = ",filtersss.filter((filtre) => filtre.filter === activeBtn).map((el) => el.value.map((el) => el.nom)));  
     
     // État pour les filtres sélectionnés
-    /*const [selectedRegions, setSelectedRegions] = useState<string[]>([]);*/
+    /*const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
     const [selectedCouleurs, setSelectedCouleurs] = useState<string[]>([]);
     const [selectedCepages, setSelectedCepages] = useState<string[]>([]);
-    const [selectedMets, setSelectedMets] = useState<string[]>([]);
+    const [selectedMets, setSelectedMets] = useState<string[]>([]);*/
     
 
     // Fonction pour gérer la sélection des filtres
@@ -105,6 +111,7 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
 
     return (
         <RegionsContext.Provider value={{selectedFilters: selectedRegions, setSelectedFilters: setSelectedRegions}}>
+            
         <View style={styles.container}>
             {/* Title */}
             <Text style={styles.title}>Filtres</Text>

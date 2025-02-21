@@ -12,7 +12,22 @@ export const RegionsContext = createContext<FilterContextType>({
     setSelectedFilters: () => {},
 });
 
+export const MetsContext = createContext<FilterContextType>({
+    selectedFilters: [],
+    setSelectedFilters: () => {},
+});
+
+export const CepagesContext = createContext<FilterContextType>({
+    selectedFilters: [],
+    setSelectedFilters: () => {},
+});
+
+export const CouleursContext = createContext<FilterContextType>({
+    selectedFilters: [],
+    setSelectedFilters: () => {},
+});
+
 //export const RegionsContext = createContext(null);
-export const MetsContext = createContext<string[]>([]);
+/*export const MetsContext = createContext<string[]>([]);
 export const CepagesContext = createContext<string[]>([]);
-export const CouleursContext = createContext<string[]>([]);
+export const CouleursContext = createContext<string[]>([]);*/

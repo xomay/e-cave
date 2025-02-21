@@ -110,7 +110,7 @@ export default function Index() {
                 right: 20,
                 bottom: 20,
             }}
-            onPress={() => router.push('../editPage')}>
+            onPress={() => router.push('./editPage')}>
                 <FontAwesome size={40} name="plus-circle"/>
             </TouchableOpacity>
         </View>
@@ -125,9 +125,18 @@ export default function Index() {
         >
             <RegionsContext.Provider 
             value={{selectedFilters: selectedRegions, setSelectedFilters: setSelectedRegions}}>
+                <CepagesContext.Provider
+                value={{selectedFilters: selectedCepages, setSelectedFilters: setSelectedCepages}}>
+                    <CouleursContext.Provider
+                    value={{selectedFilters: selectedCouleurs, setSelectedFilters: setSelectedCouleurs}}>
+                        <MetsContext.Provider
+                        value={{selectedFilters: selectedMets, setSelectedFilters: setSelectedMets}}>
 
             <FilterSection regions={regions} mets={mets} cepages={cepages} couleurs={couleurs}/>
             <WineSection data={data}/>
+            </MetsContext.Provider>
+            </CouleursContext.Provider>
+            </CepagesContext.Provider>
             </RegionsContext.Provider>
         </ScrollView>
 

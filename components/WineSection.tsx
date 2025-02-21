@@ -38,19 +38,39 @@ const wines: Wine[] = [
     domaine: 'Domaine A',
     appellation: '',
     region: 'Bordeaux',
-    cepage: 'Cepage A',
+    cepage: 'Mixte',
     millesime: 2019,
     quantite: 6,
-    couleur: 'Rouge',
+    couleur: 'Blanc',
 },
 {
     id: 2,
     domaine: 'Domaine B',
-    region: 'Région B',
-    cepage: 'Cepage B',
+    region: 'Bourgogne',
+    cepage: 'Mixte',
     millesime: 2020,
     quantite: 12,
-    couleur: 'Blanc',
+    couleur: 'Rosé',
+    appellation: '',
+},
+{
+    id: 3,
+    domaine: 'Domaine Blanchard',
+    region: 'Bordeaux',
+    cepage: 'Mixte',
+    millesime: 2020,
+    quantite: 12,
+    couleur: 'Rouge',
+    appellation: '',
+},
+{
+    id: 4,
+    domaine: 'Chateau Segur',
+    region: 'Bordeaux',
+    cepage: 'Pinot Noir',
+    millesime: 2020,
+    quantite: 12,
+    couleur: 'Rouge',
     appellation: '',
 },
 // Ajoutez d'autres vins au besoin
@@ -58,9 +78,12 @@ const wines: Wine[] = [
 
 export default function WineSection(props: { data: WineZ[] }) {
     const {selectedFilters: selectedRegions, setSelectedFilters: setSelectedRegions} = useContext(RegionsContext);
-    const selectedCouleurs = useContext(CouleursContext);
+    const {selectedFilters: selectedCouleurs, setSelectedFilters: setSelectedCouleurs} = useContext(CouleursContext);
+    const {selectedFilters: selectedCepages, setSelectedFilters: setSelectedCepages} = useContext(CepagesContext);
+    const {selectedFilters: selectedMets, setSelectedFilters: setSelectedMets} = useContext(MetsContext);
+    /*const selectedCouleurs = useContext(CouleursContext);
     const selectedCepages = useContext(CepagesContext);
-    const selectedMets = useContext(MetsContext);
+    const selectedMets = useContext(MetsContext);*/
     const filteredWines = wines.filter(wine => {
         const regionMatch = selectedRegions.length === 0 || selectedRegions.includes(wine.region);
         const couleurMatch = selectedCouleurs.length === 0 || selectedCouleurs.includes(wine.couleur);
