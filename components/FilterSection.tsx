@@ -6,7 +6,7 @@ import { RegionsContext, MetsContext, CepagesContext, CouleursContext } from './
 import {colors} from '@/constants/colors';
 import {fonts} from '@/constants/fonts';
 
-const filterButtons = ['Mets', 'Région', 'Cépage', 'Couleur'];
+const filterButtons = ['Mets', 'Région', 'Cépage', 'Millésime'];
 
 const cardData = [
     { id: '1', title: 'Viande', filter: 'Mets' },
@@ -65,8 +65,20 @@ const regionImages =
 const millesimeImage = 
 [
     {
-    region : "Bordeaux",
-    image: require('@/assets/images/regions/Bordeaux.png'),
+    millesime : "-5ans",
+    image: require('@/assets/images/millesime/-5ans.png'),
+    },
+    {
+    millesime : "5-10ans",
+    image: require('@/assets/images/millesime/5-10ans.png'),
+    },
+    {
+    millesime : "10-20ans",
+    image: require('@/assets/images/millesime/10-20ans.png'),
+    },
+    {
+    millesime : "+20ans",
+    image: require('@/assets/images/millesime/+20ans.png'),
     },
 ];
 
@@ -118,18 +130,19 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
     const mets = props.mets;
     const cepages = props.cepages;
     const couleurs = props.couleurs;
+    const millesime = [{nom: "-5ans"}, {nom: "5-10ans"}, {nom: "10-20ans"}, {nom: "+20ans"}];
     const filters= {
         regions: regions, 
         mets: mets, 
         cepages: cepages, 
-        couleurs: couleurs};
+        millesime: millesime};
     /*console.log("filters = ",filters);
     console.log("regions = ",regions);*/
     const filtersss = [
         { value: regions, filter: 'Région' },
         { value: mets, filter: 'Mets' },
         { value: cepages, filter: 'Cépage' },
-        { value: couleurs, filter: 'Couleur' },
+        { value: millesime, filter: 'Millésime' },
     ];
 
     const handleFilterPress = (button:string) => {
@@ -210,7 +223,7 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
                         <TouchableOpacity key={`${el.nom}-${selectedRegions.includes(el.nom) || selectedCepages.includes(el.nom) 
                             || selectedCouleurs.includes(el.nom)
                             || selectedMets.includes(el.nom) ? 'selected' : 'not-selected'}`} 
-                style={[styles.card, { backgroundColor: (selectedRegions.includes(el.nom) 
+                style={[styles.card,{justifyContent: (activeBtn !== 'Millésime') ? 'space-between' : 'center'}, { backgroundColor: (selectedRegions.includes(el.nom) 
                     || selectedCepages.includes(el.nom) 
                     || selectedCouleurs.includes(el.nom)
                     || selectedMets.includes(el.nom)
@@ -218,7 +231,9 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
                 onPress={() => toggleFilter(activeBtn, el.nom)}
                 >
                     {activeBtn === 'Région' ? <Image source={regionImages.find(region => region.region === el.nom)?.image} style={styles.imageCard} resizeMode="contain"/> : null}
-                            <Text style={styles.cardText}>{el.nom}</Text>
+                    {activeBtn === 'Cépage' ? <Image source={require('@/assets/images/cepages/Assemblage.png')} style={styles.imageCard} resizeMode="contain"/> : null}
+                    {activeBtn === 'Millésime' ? <Image source={millesimeImage.find(millesime => millesime.millesime === el.nom)?.image} style={styles.imageCard} resizeMode="contain"/> : null}
+                            {activeBtn !== 'Millésime' ? <Text style={styles.cardText}>{el.nom}</Text> : null}
                         </TouchableOpacity>
                         )}
 
@@ -299,7 +314,7 @@ const styles = StyleSheet.create({
         width: 120,
         height: 120,
         alignItems: 'center',
-        justifyContent: 'space-between',
+        //justifyContent: 'space-between',
     },
     imageCard: {
         //width: '80%',
