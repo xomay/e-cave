@@ -1,4 +1,4 @@
-import { ScrollView, Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View, StyleSheet, ActivityIndicator } from "react-native";
 
 //const PlaceHolderImage = require('@/assets/images/wine-bottle.png');
 import FilterSection from "@/components/FilterSection";
@@ -53,6 +53,8 @@ type Couleur = {
 }
 export default function Index() {
 
+  const [loading, setLoading] = useState(true);
+
   const [data, setData] = useState<Wine[]>([])
   const [regions, setRegions] = useState<Region[]>([])
   const [mets, setMets] = useState<Mets[]>([])
@@ -72,7 +74,13 @@ export default function Index() {
 
     const loadWines = async () => {
         //console.log("Fetching bouteilles");
-        const res = await database.getAllAsync<Wine>('SELECT vin.id_vin as id,appellation.nom_a as appellation,domaine.nom_d as domaine,region.nom_r as region,couleur.nom_co as couleur,cepage.nom_ce as cepage FROM vin, appellation, region, couleur, cepage, domaine WHERE vin.id_appellation = appellation.id_appellation AND vin.id_region=region.id_region AND vin.id_couleur=couleur.id_couleur AND vin.id_cepage=cepage.id_cepage AND vin.id_domaine=domaine.id_domaine;');
+        try{
+            const res = await database.getAllAsync<Wine>('SELECT vin.id_vin as id,appellation.nom_a as appellation,domaine.nom_d as domaine,region.nom_r as region,couleur.nom_co as couleur,cepage.nom_ce as cepage FROM vin, appellation, region, couleur, cepage, domaine WHERE vin.id_appellation = appellation.id_appellation AND vin.id_region=region.id_region AND vin.id_couleur=couleur.id_couleur AND vin.id_cepage=cepage.id_cepage AND vin.id_domaine=domaine.id_domaine;');
+            setData(res);
+            setLoading(false);
+        }catch(e){
+            console.log("Error fetching bouteilles = ",e);
+        }
         //const test = await database.getEachAsync<Wine>('SELECT vin.id_vin as id,appellation.nom_a as appellation,domaine.nom_d as domaine,region.nom_r as region,couleur.nom_co as couleur,cepage.nom_ce as cepage FROM vin, appellation, region, couleur, cepage, domaine WHERE vin.id_appellation = appellation.id_appellation AND vin.id_region=region.id_region AND vin.id_couleur=couleur.id_couleur AND vin.id_cepage=cepage.id_cepage AND vin.id_domaine=domaine.id_domaine;');
         //var i = 0;
         /*for await (const wine of test) {
@@ -80,8 +88,6 @@ export default function Index() {
         }*/
         //console.log("test size = ",i);
         // console.log("res wine = ",res);
-        const temp = []
-        setData(res);
         //console.log("data size = ",data.length);
         };
 
@@ -112,11 +118,11 @@ export default function Index() {
     useFocusEffect(
         useCallback(() => {
             // console.log('useFocusEffect');
-            loadWines();
             loadRegions();
             loadMets();
             loadCepages();
             loadCouleurs();
+            loadWines();
         }, [])
     );
 
@@ -128,12 +134,19 @@ export default function Index() {
     /*<SafeAreaView style={{
         flex: 1,
     }}>*/
-    return (  
-    
-        <SafeAreaView style={{
-            flex: 1,
-            backgroundColor: colors.theme_background,
-        }}>
+   if (loading) {
+        return (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            <ActivityIndicator size="large" color="#000" />
+        </View>
+        );
+    }else{
+        return (  
+            
+            <SafeAreaView style={{
+                flex: 1,
+                backgroundColor: colors.theme_background,
+            }}>
         <ScrollView
         contentContainerStyle={{
             //flex: 1,
@@ -145,7 +158,7 @@ export default function Index() {
             height: 100,
             flex: 0,
             justifyContent: "flex-end",
-              
+            
         }}>
             <Text style={styles.welcometitle}>Bonjour Mathys,</Text>
             <TouchableOpacity style={{
@@ -175,7 +188,8 @@ export default function Index() {
         </ScrollView>
         </SafeAreaView>
 
-  );
+    );
+    }
 }
 
 const styles = StyleSheet.create({

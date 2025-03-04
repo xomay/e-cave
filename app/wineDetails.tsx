@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image, Alert} from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image, Alert, ActivityIndicator} from "react-native";
 import { router, useLocalSearchParams, Link, useFocusEffect } from "expo-router";
 import { useEffect, useState, useCallback, } from "react";
 import { useSQLiteContext } from "expo-sqlite";
@@ -31,6 +31,7 @@ type Millesime = {
 
 export default function wineDetails() {
   const database = useSQLiteContext();
+  const [loading, setLoading] = useState(true);
   
   const {id} = useLocalSearchParams<{id: string}>();
   const id_vin = parseInt(id);
@@ -46,12 +47,18 @@ export default function wineDetails() {
   const [qte, setQte] = useState<number>(0);
 
   const[take, setTake] = useState<boolean>(true);
+
+  const loadWine = async () => {
+      try {
+        const res = await database.getAllAsync<WineDetails>('SELECT bouteille.id_bouteille as id, domaine.nom_d as domaine, appellation.nom_a as appellation, region.nom_r as region , bouteille.millesime as millesime, bouteille.quantite as quantite, couleur.nom_co as couleur, cepage.nom_ce as cepage,  bouteille.note as note, type.nom_t as type FROM vin, bouteille, domaine, appellation, region, couleur, cepage, type WHERE bouteille.id_vin = $idValue AND bouteille.id_vin=vin.id_vin AND vin.id_appellation=appellation.id_appellation AND vin.id_cepage=cepage.id_cepage AND vin.id_couleur=couleur.id_couleur AND vin.id_domaine=domaine.id_domaine AND vin.id_region=region.id_region AND vin.id_type=type.id_type;', {$idValue: id});
+        setData(res);
+        setLoading(false);
+        //console.log("data = ",res);
+      } catch (error) {
+        console.error('Erreur lors du chargement des données :', error);
+      }
+  }
     
-    const loadWine = async () => {
-      const res = await database.getAllAsync<WineDetails>('SELECT bouteille.id_bouteille as id, domaine.nom_d as domaine, appellation.nom_a as appellation, region.nom_r as region , bouteille.millesime as millesime, bouteille.quantite as quantite, couleur.nom_co as couleur, cepage.nom_ce as cepage,  bouteille.note as note, type.nom_t as type FROM vin, bouteille, domaine, appellation, region, couleur, cepage, type WHERE bouteille.id_vin = $idValue AND bouteille.id_vin=vin.id_vin AND vin.id_appellation=appellation.id_appellation AND vin.id_cepage=cepage.id_cepage AND vin.id_couleur=couleur.id_couleur AND vin.id_domaine=domaine.id_domaine AND vin.id_region=region.id_region AND vin.id_type=type.id_type;', {$idValue: id});
-      setData(res);
-      //console.log("data = ",res);
-    }
 
     const loadMillesime = async () => {
       //const res = await database.getAllAsync<Millesime>('SELECT DISTINCT(bouteille.millesime) as millesime FROM bouteille WHERE bouteille.id_vin = $idValue ORDER BY millesime ASC;', {$idValue: id});
@@ -84,9 +91,9 @@ export default function wineDetails() {
     
     useFocusEffect(
       useCallback(() => {
-        loadWine();
         loadMillesime();
         loadFlacon();
+        loadWine();
       }, [])
     );
 
@@ -213,9 +220,16 @@ export default function wineDetails() {
     
     //console.log("selectedMillesime = ",millesime);
     //console.log("selectedMillesime = ",selectedMillesime);
+    if (loading) {
+      return (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="large" color="#000" />
+        </View>
+      );
+    }else{
 
-    return (
-    <SafeAreaView style={styles.safearea}>
+      return (
+        <SafeAreaView style={styles.safearea}>
 
     <ScrollView
       contentContainerStyle={{
@@ -264,9 +278,9 @@ export default function wineDetails() {
                 >
                 <Picker.Item label="Sélectionnez une option" value="" />
                 {millesime.map((option, index) => (
-                    <Picker.Item key={index} label={option.toString()} value={option.toString()} />
-                    ))}
-                    </Picker>*/}
+                  <Picker.Item key={index} label={option.toString()} value={option.toString()} />
+                  ))}
+                  </Picker>*/}
         <View style={styles.cardContainer}>
           <View style={styles.card}>
             {image ? <Image source={image} style={styles.imageRegion} resizeMode="contain"/> : null}
@@ -334,6 +348,7 @@ export default function wineDetails() {
 
     </SafeAreaView>
   );
+  }
 }
 
 const styles = StyleSheet.create({
