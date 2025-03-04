@@ -9,7 +9,7 @@ export default function RootLayout() {
   };*/
   return (
     //onInit={createDbIfNeeded} is a callback that will be called when the database is opened
-    <SQLiteProvider databaseName="db_vins.db" assetSource={{ assetId: require('../assets/db_vins.db') }}>
+    <SQLiteProvider databaseName="cave_dev_mod.db" assetSource={{ assetId: require('../assets/cave_dev_mod.db') }}>
       <Stack>
         {/*<Stack.Screen name="(tabs)" options={{ headerShown: false }} />*/}
         <Stack.Screen name="index" options={{ headerShown: false }} />

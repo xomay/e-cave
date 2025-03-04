@@ -1,28 +1,44 @@
-import { ScrollView, Text, View, TouchableOpacity } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View, StyleSheet } from "react-native";
 
 //const PlaceHolderImage = require('@/assets/images/wine-bottle.png');
 import FilterSection from "@/components/FilterSection";
 import WineSection from "@/components/WineSection";
-import { useFocusEffect } from "expo-router";
+import { FontAwesome } from '@expo/vector-icons';
+import { router, useFocusEffect } from "expo-router";
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useCallback, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {FontAwesome} from '@expo/vector-icons';
-import { router } from "expo-router";
 
-import { RegionsContext, CepagesContext, CouleursContext, MetsContext } from "@/components/Contexts";
+import { CepagesContext, CouleursContext, MetsContext, RegionsContext } from "@/components/Contexts";
 
-
+import { fonts } from '@/constants/fonts';
+import {colors} from '@/constants/colors';
 
 type Wine = {
-    domaine: number,
-    appellation: number,
-    region: number,
-    millesime: number,
-    quantite: number,
-    couleur: number,
-    cepage: number,
+    id: number,
+    appellation: string,
+    region: string,
+    couleur: string,
+    cepage: string,
+    domaine: string,
 }
+
+type WineTest = {
+    id: number,
+    appellation: string,
+    region: string,
+    millesime: number[],
+    quantite: number,
+    couleur: string,
+    cepage: string,
+    note: number,
+    domaine: string,
+}
+//bouteille.id_bouteille,
+// appellation.nom, 
+// region.nom,
+// bouteille.millesime, 
+// bouteille.quantite, couleur.nom, cepage.nom
 type Region = {
     nom: string,
 }
@@ -46,33 +62,49 @@ export default function Index() {
   // console.log("regions = ",regions);
 
   const database = useSQLiteContext();
+  //console.log("database = ",database);
 
-  const loadWines = async () => {
+  const loadWinesOld = async () => {
     const res = await database.getAllAsync<Wine>('SELECT * FROM bouteille;');
     // console.log("res = ",res);
     setData(res);
     };
 
+    const loadWines = async () => {
+        //console.log("Fetching bouteilles");
+        const res = await database.getAllAsync<Wine>('SELECT vin.id_vin as id,appellation.nom_a as appellation,domaine.nom_d as domaine,region.nom_r as region,couleur.nom_co as couleur,cepage.nom_ce as cepage FROM vin, appellation, region, couleur, cepage, domaine WHERE vin.id_appellation = appellation.id_appellation AND vin.id_region=region.id_region AND vin.id_couleur=couleur.id_couleur AND vin.id_cepage=cepage.id_cepage AND vin.id_domaine=domaine.id_domaine;');
+        //const test = await database.getEachAsync<Wine>('SELECT vin.id_vin as id,appellation.nom_a as appellation,domaine.nom_d as domaine,region.nom_r as region,couleur.nom_co as couleur,cepage.nom_ce as cepage FROM vin, appellation, region, couleur, cepage, domaine WHERE vin.id_appellation = appellation.id_appellation AND vin.id_region=region.id_region AND vin.id_couleur=couleur.id_couleur AND vin.id_cepage=cepage.id_cepage AND vin.id_domaine=domaine.id_domaine;');
+        //var i = 0;
+        /*for await (const wine of test) {
+            i++;
+        }*/
+        //console.log("test size = ",i);
+        // console.log("res wine = ",res);
+        const temp = []
+        setData(res);
+        //console.log("data size = ",data.length);
+        };
+
     const loadRegions = async () => {
-        const res = await database.getAllAsync<Region>('SELECT nom FROM region;');
-        // console.log("res = ",res);
+        const res = await database.getAllAsync<Region>('SELECT nom_r as nom FROM region;');
+        // console.log("res region = ",res);
         setRegions(res);
         };
 
     const loadMets = async () => {
-        const res = await database.getAllAsync<Mets>('SELECT nom FROM mets;');
+        const res = await database.getAllAsync<Mets>('SELECT nom_m as nom FROM mets;');
         // console.log("res = ",res);
         setMets(res);
         };
     
     const loadCepages = async () => {
-        const res = await database.getAllAsync<Cepage>('SELECT nom FROM cepage;');
-        // console.log("res = ",res);
+        const res = await database.getAllAsync<Cepage>('SELECT nom_ce as nom FROM cepage ORDER BY id_cepage ASC;');
+        // console.log("res cepage = ",res);
         setCepages(res);
         };
     
     const loadCouleurs = async () => {
-        const res = await database.getAllAsync<Couleur>('SELECT nom FROM couleur;');
+        const res = await database.getAllAsync<Couleur>('SELECT nom_co as nom FROM couleur;');
         // console.log("res = ",res);
         setCouleurs(res);
         };
@@ -93,18 +125,29 @@ export default function Index() {
     const [selectedCouleurs, setSelectedCouleurs] = useState<string[]>([]);
     const [selectedCepages, setSelectedCepages] = useState<string[]>([]);
     const [selectedMets, setSelectedMets] = useState<string[]>([]);
-    
-    return (  
-    <SafeAreaView style={{
+    /*<SafeAreaView style={{
         flex: 1,
-    }}>
+    }}>*/
+    return (  
+    
+        <SafeAreaView style={{
+            flex: 1,
+            backgroundColor: colors.theme_background,
+        }}>
+        <ScrollView
+        contentContainerStyle={{
+            //flex: 1,
+            //justifyContent: "center",
+            //alignItems: "center",
+        }} indicatorStyle="black"
+        >
         <View style={{
             height: 100,
             flex: 0,
             justifyContent: "flex-end",
+              
         }}>
-            <Text>Bonjour Laurent</Text>
-            <Text>Bienvenue dans votre cave</Text>
+            <Text style={styles.welcometitle}>Bonjour Mathys,</Text>
             <TouchableOpacity style={{
                 position: "absolute",
                 right: 20,
@@ -114,15 +157,6 @@ export default function Index() {
                 <FontAwesome size={40} name="plus-circle"/>
             </TouchableOpacity>
         </View>
-        
-        <ScrollView
-        contentContainerStyle={{
-            flex: 2,
-            //justifyContent: "center",
-            //alignItems: "center",
-        }}
-        
-        >
             <RegionsContext.Provider 
             value={{selectedFilters: selectedRegions, setSelectedFilters: setSelectedRegions}}>
                 <CepagesContext.Provider
@@ -139,8 +173,15 @@ export default function Index() {
             </CepagesContext.Provider>
             </RegionsContext.Provider>
         </ScrollView>
-
-    </SafeAreaView>
+        </SafeAreaView>
 
   );
 }
+
+const styles = StyleSheet.create({
+    welcometitle: {
+        fontSize: 30,
+        fontFamily: fonts.neuebold,
+        padding: 10,
+    },
+});

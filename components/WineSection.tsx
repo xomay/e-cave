@@ -1,6 +1,9 @@
+import { router } from 'expo-router';
 import React, { useContext } from 'react';
-import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { router, Stack } from 'expo-router';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+import { fonts } from '@/constants/fonts';
+import {colors} from '@/constants/colors';
 
 /*interface Wine {
 id: string;
@@ -12,7 +15,7 @@ grape: string;
 
 import { CepagesContext, CouleursContext, MetsContext, RegionsContext } from './Contexts';
 
-type WineZ = {
+type WineOld = {
     domaine: number,
     appellation: number,
     region: number,
@@ -21,7 +24,17 @@ type WineZ = {
     couleur: number,
     cepage: number,
 }
+
 type Wine = {
+    id: number,
+    appellation: string,
+    region: string,
+    couleur: string,
+    cepage: string,
+    domaine: string,
+}
+
+type WineZ = {
     id: number,
     domaine: string,
     appellation: string,
@@ -32,13 +45,13 @@ type Wine = {
     cepage: string,
 }
 
-const wines: Wine[] = [
+const wines: WineZ[] = [
 {
     id: 1,
     domaine: 'Domaine A',
     appellation: '',
     region: 'Bordeaux',
-    cepage: 'Mixte',
+    cepage: 'Assemblage',
     millesime: 2019,
     quantite: 6,
     couleur: 'Blanc',
@@ -47,7 +60,7 @@ const wines: Wine[] = [
     id: 2,
     domaine: 'Domaine B',
     region: 'Bourgogne',
-    cepage: 'Mixte',
+    cepage: 'Assemblage',
     millesime: 2020,
     quantite: 12,
     couleur: 'Rosé',
@@ -57,7 +70,7 @@ const wines: Wine[] = [
     id: 3,
     domaine: 'Domaine Blanchard',
     region: 'Bordeaux',
-    cepage: 'Mixte',
+    cepage: 'Assemblage',
     millesime: 2020,
     quantite: 12,
     couleur: 'Rouge',
@@ -76,15 +89,14 @@ const wines: Wine[] = [
 // Ajoutez d'autres vins au besoin
 ];
 
-export default function WineSection(props: { data: WineZ[] }) {
+//props: { data: Wine[] }
+export default function WineSection(props: { data: Wine[] }) {
     const {selectedFilters: selectedRegions, setSelectedFilters: setSelectedRegions} = useContext(RegionsContext);
     const {selectedFilters: selectedCouleurs, setSelectedFilters: setSelectedCouleurs} = useContext(CouleursContext);
     const {selectedFilters: selectedCepages, setSelectedFilters: setSelectedCepages} = useContext(CepagesContext);
     const {selectedFilters: selectedMets, setSelectedFilters: setSelectedMets} = useContext(MetsContext);
-    /*const selectedCouleurs = useContext(CouleursContext);
-    const selectedCepages = useContext(CepagesContext);
-    const selectedMets = useContext(MetsContext);*/
-    const filteredWines = wines.filter(wine => {
+
+    const filteredWines = props.data.filter(wine => {
         const regionMatch = selectedRegions.length === 0 || selectedRegions.includes(wine.region);
         const couleurMatch = selectedCouleurs.length === 0 || selectedCouleurs.includes(wine.couleur);
         const cepageMatch = selectedCepages.length === 0 || selectedCepages.includes(wine.cepage);
@@ -99,19 +111,25 @@ export default function WineSection(props: { data: WineZ[] }) {
             <View style={styles.container}>
                 
                 {filteredWines.map((wine, index) => (
+
                     <TouchableOpacity
                     key={index}
                     style={[
                         styles.card,
                         // Ajoute une marge droite pour la première carte d'une ligne
                         { marginRight: index % 2 === 0 ? 10 : 0 },
-                        ]}
-                        onPress={() => router.push(`../wineDetails?id=${wine.id}`)}
+                    ]}
+                    onPress={() => router.push(`../wineDetails?id=${wine.id}`)}
                     >
-                        <Image source={{ uri: 'https://via.placeholder.com/150' }} style={styles.image} />
-                        <Text style={styles.title}>{wine.domaine}</Text>
-                        <Text style={styles.text}>{wine.region}</Text>
-                        <Text style={styles.text}>{wine.cepage}</Text>
+                        <Image source={wine.couleur == 'Rouge' ? require('../assets/images/bouteille-rouge.png') : wine.couleur == 'Rose' ? require('../assets/images/bouteille-rose.png') : require('../assets/images/bouteille-blanc.png')} 
+                        style={styles.image} 
+                        resizeMode='contain'/>
+                        <View style={styles.textContainer}>
+                            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={{height: 50, zIndex: 0}}>
+                                <Text style={styles.title} numberOfLines={1}>{wine.appellation}</Text>
+                            </ScrollView>
+                                <Text style={styles.text} numberOfLines={1}>{wine.domaine}</Text>
+                        </View>
                     </TouchableOpacity>
                 ))}
             </View>
@@ -135,30 +153,54 @@ sectionTitle: {
 },
 card: {
     width: cardWidth,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 10,
+    height: 180,
+    backgroundColor: '#fcfcfc',
+    borderRadius: 18,
+    //padding: 10,
+    marginBottom: 15,
+    marginTop: 30,
     // Ajout d'une ombre pour iOS et Android
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    zIndex: 0,
 },
 image: {
-    width: '100%',
-    height: 100,
-    borderRadius: 10,
+    maxWidth: '80%', // Adjust the width as needed
+    height: 140, // Adjust the height as needed
+    //borderRadius: 10,
     marginBottom: 10,
+    position: 'absolute',
+    top: -20, // Adjust the value to control how much the image overlaps
+},
+textContainer: {
+    alignItems: 'flex-start',
+    justifyContent: 'flex-end',
+    width: '100%',
+    height: '35%',
+    backgroundColor: '#fff',
+    padding: 10,
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
 },
 title: {
-    fontWeight: 'bold',
+    //fontWeight: 'bold',
+    fontFamily: fonts.sfbold,
+    color: colors.primary_blue,
     marginBottom: 5,
-    textAlign: 'center',
+    //textAlign: 'left',
+    fontSize: 18,
+    height: 30,
+    //marginTop: 10,
 },
 text: {
-    textAlign: 'center',
-    marginBottom: 3,
+    textAlign: 'left',
+    marginBottom: 4,
+    fontSize: 16,
+    color: colors.primary_blue,
 },
 });

@@ -1,7 +1,10 @@
 import { useContext, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Image, FlatList } from 'react-native';
 
 import { RegionsContext, MetsContext, CepagesContext, CouleursContext } from './Contexts';
+
+import {colors} from '@/constants/colors';
+import {fonts} from '@/constants/fonts';
 
 const filterButtons = ['Mets', 'Région', 'Cépage', 'Couleur'];
 
@@ -10,6 +13,69 @@ const cardData = [
     { id: '2', title: 'Poisson', filter: 'Mets' },
     { id: '3', title: 'Bordeaux', filter: 'Région' },
     { id: '4', title: 'Pinot Noir', filter: 'Cépage' },
+];
+
+const regionImages = 
+    [
+      {
+        region : "Bordeaux",
+        image: require('@/assets/images/regions/Bordeaux.png'),
+      },
+      { region : "Bourgogne",
+        image: require('@/assets/images/regions/Bourgogne.png'),
+      },
+      {
+        region: "Allemagne",
+        image: require('@/assets/images/regions/Allemagne.png'),
+      },
+      {
+        region: "Espagne",
+        image: require('@/assets/images/regions/Espagne.png'),
+      },
+      {
+        region: "Alsace",
+        image: require('@/assets/images/regions/Alsace.png'),
+      },
+      {
+        region: "Champagne",
+        image: require('@/assets/images/regions/Champagne.png'),
+      },
+      {
+        region: "Languedoc-Roussillon",
+        image: require('@/assets/images/regions/Languedoc-Roussillon.png'),
+      },
+      {
+        region: "Loire",
+        image: require('@/assets/images/regions/Loire.png'),
+      },
+      {
+        region: "Provence",
+        image: require('@/assets/images/regions/Provence.png'),
+      },
+      {
+        region: "Rhone",
+        image: require('@/assets/images/regions/Rhone.png'),
+      },
+      {
+        region: "Sud Ouest",
+        image: require('@/assets/images/regions/Sud Ouest.png'),
+      }
+    ];
+
+const millesimeImage = 
+[
+    {
+    region : "Bordeaux",
+    image: require('@/assets/images/regions/Bordeaux.png'),
+    },
+];
+
+const metsImage = 
+[
+    {
+    region : "Bordeaux",
+    image: require('@/assets/images/regions/Bordeaux.png'),
+    },
 ];
 
 type Region = {
@@ -67,7 +133,7 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
     ];
 
     const handleFilterPress = (button:string) => {
-        console.log("activeBtn = ",activeBtn);
+        //console.log("activeBtn = ",activeBtn);
         setActiveBtn(button);
     }
 
@@ -114,12 +180,12 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
             
         <View style={styles.container}>
             {/* Title */}
-            <Text style={styles.title}>Filtres</Text>
+            {/*<Text style={styles.title}>Filtres</Text>*/}
 
             {/* Filter Buttons */}
             <View style={styles.buttonRow}>
                 {filterButtons.map((button, index) => (
-                    <TouchableOpacity key={index} style={[styles.filterButton, { backgroundColor: activeBtn === button ? '#6cbfd4' : '#ebebeb'}]}
+                    <TouchableOpacity key={index} style={[styles.filterButton, { backgroundColor: activeBtn === button ? colors.theme_orange : colors.secondary_blue}]}
                     onPress={() => handleFilterPress(button)}>
                         <Text style={styles.buttonText}>{button}</Text>
                     </TouchableOpacity>
@@ -136,23 +202,43 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
                     </TouchableOpacity>
                     ))}
                     </ScrollView>*/}
+
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cardScroll}>
                 {filtersss.
-                filter((filtre) => filtre.filter === activeBtn)
-                .map((el) => 
-                    el.value.map((el, index) =>
-                        <TouchableOpacity key={index} 
+                filter((filtre) => filtre.filter === activeBtn)[0].value
+                .map((el) =>
+                        <TouchableOpacity key={`${el.nom}-${selectedRegions.includes(el.nom) || selectedCepages.includes(el.nom) 
+                            || selectedCouleurs.includes(el.nom)
+                            || selectedMets.includes(el.nom) ? 'selected' : 'not-selected'}`} 
                 style={[styles.card, { backgroundColor: (selectedRegions.includes(el.nom) 
                     || selectedCepages.includes(el.nom) 
                     || selectedCouleurs.includes(el.nom)
                     || selectedMets.includes(el.nom)
-                )? '#6cbfd4' : '#ebebeb'}]}
+                )? colors.theme_orange : colors.tertiary_blue}]}
                 onPress={() => toggleFilter(activeBtn, el.nom)}
                 >
+                    {activeBtn === 'Région' ? <Image source={regionImages.find(region => region.region === el.nom)?.image} style={styles.imageCard} resizeMode="contain"/> : null}
                             <Text style={styles.cardText}>{el.nom}</Text>
                         </TouchableOpacity>
-                        ))}
+                        )}
+
+                
             </ScrollView>
+            {/*<ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cardScroll}>
+                <FlatList style={{flexDirection: 'row', width: '100%'}} horizontal={true} data={filtersss.filter((filtre) => filtre.filter === activeBtn)[0].value} renderItem={({item}) => 
+                <TouchableOpacity
+                //style={[styles.card, {backgroundColor: }]}
+                style={[styles.card, { backgroundColor: (selectedRegions.includes(item.nom) 
+                    || selectedCepages.includes(item.nom) 
+                    || selectedCouleurs.includes(item.nom)
+                    || selectedMets.includes(item.nom)
+                )? colors.theme_orange : colors.tertiary_blue}]}
+                onPress={() => toggleFilter(activeBtn, item.nom)}
+                >
+                    {activeBtn === 'Région' ? <Image source={regionImages.find(region => region.region === item.nom)?.image} style={styles.imageCard} resizeMode="contain"/> : null}
+                    <Text style={styles.cardText}>{item.nom}</Text>
+                </TouchableOpacity> }/>
+            </ScrollView>*/}
             {/*<View>
                 {selectedRegions.map((region, index) => (
                     <Text key={index}>{region}</Text>
@@ -188,18 +274,22 @@ const styles = StyleSheet.create({
     },
     filterButton: {
         //backgroundColor: '#6cbfd4',
-        backgroundColor: '#ebebeb',
+        backgroundColor: colors.theme_white,
         paddingVertical: 8,
         paddingHorizontal: 12,
         borderRadius: 20,
         marginRight: 8,
     },
     buttonText: {
-        color: '#000',
+        color: colors.theme_white,
         fontSize: 16,
     },
     cardScroll: {
         // width determined by content
+        width: '100%',
+        flexDirection: 'row',
+        flexWrap: 'nowrap',
+        marginBottom: 20,
     },
     card: {
         //backgroundColor: '#fff',
@@ -207,10 +297,19 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         marginRight: 12,
         width: 120,
+        height: 120,
         alignItems: 'center',
+        justifyContent: 'space-between',
     },
+    imageCard: {
+        //width: '80%',
+        height: '80%',
+        maxWidth: '100%',
+      },
     cardText: {
-        fontSize: 16,
+        color: colors.theme_white,
+        fontFamily: fonts.sfmedium,
+        fontSize: 12,
     },
 });
 
