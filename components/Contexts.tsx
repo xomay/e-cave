@@ -22,7 +22,7 @@ export const CepagesContext = createContext<FilterContextType>({
     setSelectedFilters: () => {},
 });
 
-export const CouleursContext = createContext<FilterContextType>({
+export const MillesimeContext = createContext<FilterContextType>({
     selectedFilters: [],
     setSelectedFilters: () => {},
 });

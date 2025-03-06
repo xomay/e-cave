@@ -1,12 +1,11 @@
-import { Text, View, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image, Alert, ActivityIndicator} from "react-native";
-import { router, useLocalSearchParams, Link, useFocusEffect } from "expo-router";
-import { useEffect, useState, useCallback, } from "react";
-import { useSQLiteContext } from "expo-sqlite";
-import {Picker} from '@react-native-picker/picker';
+import { metsImage, regionImages } from "@/components/FilterSection";
 import { colors } from "@/constants/colors";
-import {fonts} from '@/constants/fonts';
-import WineSection from "@/components/WineSection";
+import { fonts } from '@/constants/fonts';
 import { AntDesign } from '@expo/vector-icons';
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import { useCallback, useEffect, useState, } from "react";
+import { ActivityIndicator, Alert, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 
 
@@ -21,17 +20,29 @@ type WineDetails = {
   cepage: string,
   type: string,
   note: number,
+  flacon: number,
 }
 
 type Millesime = {
   millesime: number,
 }
 
+type Flacon = {
+  flacon: number,
+}
+
+type Mets = {
+  mets: string,
+}
+
 //TODO : 
 
 export default function wineDetails() {
   const database = useSQLiteContext();
-  const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+        setLoading(true);
+    }, []);
   
   const {id} = useLocalSearchParams<{id: string}>();
   const id_vin = parseInt(id);
@@ -39,26 +50,22 @@ export default function wineDetails() {
   const [data, setData] = useState<WineDetails[]>([])
   const [millesime, setMillesime] = useState<number[]>([])
   const [flacon, setFlacon] = useState<number[]>([])
+  const [mets, setMets] = useState<Mets[]>([])
   
   const [selectedMillesime, setSelectedMillesime] = useState<number>(millesime[0]);
-  const [selectedFlacon, setSelectedFlacon] = useState<number>(flacon[0]);
+  const [selectedFlacon, setSelectedFlacon] = useState<number>(0);
   const [selectedWine, setSelectedWine] = useState<WineDetails | undefined>(data[0]);
 
   const [qte, setQte] = useState<number>(0);
 
   const[take, setTake] = useState<boolean>(true);
-
-  const loadWine = async () => {
-      try {
-        const res = await database.getAllAsync<WineDetails>('SELECT bouteille.id_bouteille as id, domaine.nom_d as domaine, appellation.nom_a as appellation, region.nom_r as region , bouteille.millesime as millesime, bouteille.quantite as quantite, couleur.nom_co as couleur, cepage.nom_ce as cepage,  bouteille.note as note, type.nom_t as type FROM vin, bouteille, domaine, appellation, region, couleur, cepage, type WHERE bouteille.id_vin = $idValue AND bouteille.id_vin=vin.id_vin AND vin.id_appellation=appellation.id_appellation AND vin.id_cepage=cepage.id_cepage AND vin.id_couleur=couleur.id_couleur AND vin.id_domaine=domaine.id_domaine AND vin.id_region=region.id_region AND vin.id_type=type.id_type;', {$idValue: id});
-        setData(res);
-        setLoading(false);
-        //console.log("data = ",res);
-      } catch (error) {
-        console.error('Erreur lors du chargement des données :', error);
-      }
-  }
     
+    const loadWine = async () => {
+      const res = await database.getAllAsync<WineDetails>('SELECT bouteille.id_bouteille as id,bouteille.flacon as flacon, domaine.nom_d as domaine, appellation.nom_a as appellation, region.nom_r as region , bouteille.millesime as millesime, bouteille.quantite as quantite, couleur.nom_co as couleur, cepage.nom_ce as cepage,  bouteille.note as note, type.nom_t as type FROM vin, bouteille, domaine, appellation, region, couleur, cepage, type WHERE bouteille.id_vin = $idValue AND bouteille.id_vin=vin.id_vin AND vin.id_appellation=appellation.id_appellation AND vin.id_cepage=cepage.id_cepage AND vin.id_couleur=couleur.id_couleur AND vin.id_domaine=domaine.id_domaine AND vin.id_region=region.id_region AND vin.id_type=type.id_type;', {$idValue: id});
+      setData(res);
+      //console.log("data = ",res);
+      setLoading(false);
+    }
 
     const loadMillesime = async () => {
       //const res = await database.getAllAsync<Millesime>('SELECT DISTINCT(bouteille.millesime) as millesime FROM bouteille WHERE bouteille.id_vin = $idValue ORDER BY millesime ASC;', {$idValue: id});
@@ -77,77 +84,91 @@ export default function wineDetails() {
       
     }
     
-    const loadFlacon = async () => {
-      const res = await database.getAllAsync<number>('SELECT DISTINCT(bouteille.flacon) as flacon FROM bouteille WHERE bouteille.id_vin = $idValue ORDER BY flacon ASC;', {$idValue: id});
-      setFlacon(res);
+    /*const loadFlacon = async () => {
+      //setFlacon([data.find(wine => wine.flacon === flacon[0])?.flacon ?? 0]);
+      setSelectedFlacon(data.find(wine => wine.flacon === flacon[0])?.flacon ?? 0);
+      setFlacon([data.find(wine => wine.millesime === millesime[0])?.flacon ?? 0]);
+      //console.log("flacon = ", selectedWine)
+      /*var i = 0;
+      const res = database.getEachAsync<Flacon>('SELECT DISTINCT(bouteille.flacon) as flacon FROM bouteille WHERE bouteille.id_vin = $idValue ORDER BY flacon ASC;', {$idValue: id});
+      for await (const row of res) {
+        setFlacon(prev => [...prev, row.flacon]);
+        if (i == 0) {
+          setSelectedFlacon(row.flacon);
+        }
+        i++;
+      }
+    }*/
+
+    const loadMets = async () => {
+      try{
+        const res = await database.getAllAsync<Mets>('SELECT mets.nom_m as mets FROM vin, marie, mets WHERE vin.id_vin = marie.id_vin AND mets.id_mets = marie.id_mets AND vin.id_vin=$id;', {$id: id});
+        setMets(res);
+        //console.log("mets = ",res);
+      }catch (error) {
+        console.error('Erreur lors du chargement des mets :', error);
+      }
+      
     }
 
     useEffect(() => {
       if (millesime.length > 0) {
         setSelectedMillesime(millesime[0]);
-        setSelectedWine(data.find(wine => wine.millesime === millesime[0]));
+        const sWine: WineDetails | undefined = data.find(wine => wine.millesime === millesime[0]);
+        //console.log(sWine?.millesime);
+        setSelectedWine(sWine);
+        data.filter(wine => wine.millesime === sWine?.millesime).map((wine,index) => 
+          {if (!flacon.includes(wine.flacon)){
+            index === 0 ? setSelectedFlacon(wine.flacon) : null;
+            setFlacon(prev => [...prev, wine.flacon ?? 0]);
+            //console.log(wine.flacon);
+          }
+        })
+        //setSelectedFlacon(data.find(wine => wine.flacon === flacon[0])?.flacon ?? 0);
+        //setFlacon([data.find(wine => wine.millesime === millesime[0])?.flacon ?? 0]);
+        //console.log("selectedWine = ",data.find(wine => wine.millesime === millesime[0]));
       }
     }, [millesime]);
     
     useFocusEffect(
       useCallback(() => {
-        loadMillesime();
-        loadFlacon();
         loadWine();
+        loadMillesime();
+        //loadFlacon();
+        loadMets();
       }, [])
     );
 
     const handleMillesimePress = (millesime: number) => {
+      //console.log("Bouton pressed")
       setSelectedMillesime(millesime);
-      setSelectedWine(data.find(wine => wine.millesime === millesime));
+      var flaconTemp : number[] = [];
+      setFlacon([])
+      //setSelectedWine(data.find(wine => wine.millesime === millesime));
+      const sWine: WineDetails | undefined = data.find(wine => wine.millesime === millesime);
+      //console.log(sWine?.millesime);
+      setSelectedWine(sWine);
+      //console.log(sWine)
+      data.filter(wine => wine.millesime === sWine?.millesime).map((wine,index) => 
+        {
+          //index === 0 ? setSelectedFlacon(wine.flacon) : null;
+          if (!flaconTemp.includes(wine.flacon)){
+            flaconTemp.push(wine.flacon)
+            //console.log("Flacon add : ",wine.flacon);
+          }
+        })
+      setFlacon(flaconTemp);
+      setSelectedFlacon(flaconTemp[0])
     }
 
-    const regionImages = 
-    [
-      {
-        region : "Bordeaux",
-        image: require('@/assets/images/regions/Bordeaux.png'),
-      },
-      { region : "Bourgogne",
-        image: require('@/assets/images/regions/Bourgogne.png'),
-      },
-      {
-        region: "Allemagne",
-        image: require('@/assets/images/regions/Allemagne.png'),
-      },
-      {
-        region: "Espagne",
-        image: require('@/assets/images/regions/Espagne.png'),
-      },
-      {
-        region: "Alsace",
-        image: require('@/assets/images/regions/Alsace.png'),
-      },
-      {
-        region: "Champagne",
-        image: require('@/assets/images/regions/Champagne.png'),
-      },
-      {
-        region: "Languedoc-Roussillon",
-        image: require('@/assets/images/regions/Languedoc-Roussillon.png'),
-      },
-      {
-        region: "Loire",
-        image: require('@/assets/images/regions/Loire.png'),
-      },
-      {
-        region: "Provence",
-        image: require('@/assets/images/regions/Provence.png'),
-      },
-      {
-        region: "Rhone",
-        image: require('@/assets/images/regions/Rhone.png'),
-      },
-      {
-        region: "Sud Ouest",
-        image: require('@/assets/images/regions/Sud Ouest.png'),
-      }
-    ];
+    const handleFlaconPress = (flacon: number) => {
+      setSelectedFlacon(flacon);
+      const sWine = data.find(wine => wine.flacon === flacon && selectedWine?.millesime === wine.millesime)
+      //setSelectedWine(prev => data.find(wine => wine.flacon === flacon && prev?.millesime === wine.millesime));
+      setSelectedWine(sWine);
+      //console.log("selectedWine = ",sWine);
+    }
+
     const image = regionImages.find(region => region.region === selectedWine?.region)?.image;
 
     const handlePlus = () => {
@@ -159,7 +180,15 @@ export default function wineDetails() {
       qte > 0 ? setQte(qte - 1) : null;
     } 
 
-    const handleUpdate = async () => {
+    const handlePlusAdd = () => {
+      setQte(qte + 1);
+    }
+
+    const handleMoinsAdd = () => {
+      qte > 0 ? setQte(qte - 1) : null;
+    } 
+
+    /*const handleUpdate = async () => {
       const value = selectedWine?.quantite ?? 0;
       try {
         const test = await database.runAsync('UPDATE bouteille SET quantite = $quantite WHERE id_bouteille = $idValue;', {$quantite: qte, $idValue: value});
@@ -172,7 +201,7 @@ export default function wineDetails() {
         );
       }
       router.back();
-    }
+    }*/
 
     const handleTake = async () => {
       const value = selectedWine?.quantite ?? 0;
@@ -203,7 +232,7 @@ export default function wineDetails() {
           `UPDATE bouteille SET quantite = ? WHERE id_bouteille = ?;`,
           [(value+qte), id_b]
         );
-        console.log("Item updated successfully:", response?.changes!, "id : ", id_b, "qte : ", value, "user : ", qte);
+        console.log("Item updated successfully:", "id : ", id_b, "qte : ", value, "user : ", qte);
         router.back();
       } catch (error) {
         console.error("Error updating item:", error);
@@ -221,15 +250,14 @@ export default function wineDetails() {
     //console.log("selectedMillesime = ",millesime);
     //console.log("selectedMillesime = ",selectedMillesime);
     if (loading) {
-      return (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <ActivityIndicator size="large" color="#000" />
-        </View>
-      );
-    }else{
-
-      return (
-        <SafeAreaView style={styles.safearea}>
+            return (
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <ActivityIndicator size="large" color="#000" />
+            </View>
+            );
+        }else{
+    return (
+    <SafeAreaView style={styles.safearea}>
 
     <ScrollView
       contentContainerStyle={{
@@ -240,7 +268,7 @@ export default function wineDetails() {
       }}
       showsVerticalScrollIndicator={false}
       >
-      <View style={{flexDirection: 'row',justifyContent: 'space-between',position: 'relative', maxWidth: '100%', width: '100%', marginBottom: 18}}>
+      <View style={{flexDirection: 'row',justifyContent: 'space-between',position: 'relative', maxWidth: '100%', width: '100%',}}>
 
         <View style={{flexDirection: 'column', margin: 10, width: '15%'}}>
           <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 10}}>
@@ -278,9 +306,9 @@ export default function wineDetails() {
                 >
                 <Picker.Item label="Sélectionnez une option" value="" />
                 {millesime.map((option, index) => (
-                  <Picker.Item key={index} label={option.toString()} value={option.toString()} />
-                  ))}
-                  </Picker>*/}
+                    <Picker.Item key={index} label={option.toString()} value={option.toString()} />
+                    ))}
+                    </Picker>*/}
         <View style={styles.cardContainer}>
           <View style={styles.card}>
             {image ? <Image source={image} style={styles.imageRegion} resizeMode="contain"/> : null}
@@ -290,6 +318,12 @@ export default function wineDetails() {
             <Image source={require('@/assets/images/cepages/Assemblage.png')} style={styles.imageRegion} resizeMode="contain"/>
             <Text style={styles.cardText}>{selectedWine?.cepage}</Text>
           </View>
+          {mets.map((el, index) => (
+            <View key={index} style={styles.card}>
+              <Image source={metsImage.find(mets => mets.mets === el.mets)?.image} style={styles.imageRegion} resizeMode="contain"/>
+              <Text style={styles.cardText}>{el.mets}</Text>
+            </View>
+          ))}
         </View>
         <Text style={styles.title}>Année</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.yearContainer}>
@@ -302,6 +336,18 @@ export default function wineDetails() {
                             <Text style={styles.yearText}>{el}</Text>
                         </TouchableOpacity>
                         )}
+          </ScrollView>
+        <Text style={styles.title}>Flacon</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.yearContainer}>
+            {flacon
+            .map((el, index) =>
+              <TouchableOpacity key={index} 
+            style={[styles.cardYear, { backgroundColor: (selectedFlacon==el ? colors.theme_orange : colors.tertiary_blue)}]}
+            onPress={() => handleFlaconPress(el)}
+            >
+                        <Text style={styles.yearText}>{el}cl</Text>
+                    </TouchableOpacity>
+                    )}
           </ScrollView>
               {/*<TouchableOpacity
                 onPress={() => router.back()}
@@ -332,23 +378,22 @@ export default function wineDetails() {
     
     <View style={styles.takeView}>
       <View style={styles.chooseView}>
-        <TouchableOpacity style={styles.plusmoinsButton} onPress={handleMoins}>
+        <TouchableOpacity style={styles.plusmoinsButton} onPress={take ? handleMoins : handleMoinsAdd}>
           <AntDesign name="minus" size={25}/>
         </TouchableOpacity>
         <Text style={styles.takeText}>{qte}</Text>
-        <TouchableOpacity style={styles.plusmoinsButton} onPress={handlePlus}>
+        <TouchableOpacity style={styles.plusmoinsButton} onPress={take ? handlePlus : handlePlusAdd}>
         <AntDesign name="plus" size={25}/>
         </TouchableOpacity>
       </View>
       <TouchableOpacity style={[styles.takeButton, {backgroundColor: take ? colors.primary_blue : colors.theme_orange}]} onPress={take ? handleTake : handleAdd}>
         <Text style={{color: colors.theme_white, fontSize: 15, fontFamily: fonts.sfmedium}}
-        onPress={handleTake}>{take ? "Prendre de la cave" : "Ajouter à la cave"}</Text>
+        onPress={take ? handleTake : handleAdd}>{take ? "Prendre de la cave" : "Ajouter à la cave"}</Text>
       </TouchableOpacity>
     </View>
 
     </SafeAreaView>
-  );
-  }
+  );}
 }
 
 const styles = StyleSheet.create({
@@ -393,12 +438,14 @@ const styles = StyleSheet.create({
   },
   card: {
       backgroundColor: colors.tertiary_blue,
-      padding: 16,
+      padding: 10,
       borderRadius: 12,
       marginRight: 12,
       width: 100,
       height: 100,
       alignItems: 'center',
+      marginTop: 12,
+      justifyContent: 'space-between',
   },
   imageRegion: {
     //width: '80%',

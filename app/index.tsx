@@ -1,4 +1,4 @@
-import { ScrollView, Text, TouchableOpacity, View, StyleSheet, ActivityIndicator } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 //const PlaceHolderImage = require('@/assets/images/wine-bottle.png');
 import FilterSection from "@/components/FilterSection";
@@ -9,12 +9,12 @@ import { useSQLiteContext } from 'expo-sqlite';
 import React, { useCallback, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { CepagesContext, CouleursContext, MetsContext, RegionsContext } from "@/components/Contexts";
+import { CepagesContext, MetsContext, MillesimeContext, RegionsContext } from "@/components/Contexts";
 
+import { colors } from '@/constants/colors';
 import { fonts } from '@/constants/fonts';
-import {colors} from '@/constants/colors';
 
-type Wine = {
+type WineTemp = {
     id: number,
     appellation: string,
     region: string,
@@ -23,16 +23,14 @@ type Wine = {
     domaine: string,
 }
 
-type WineTest = {
+type Wine = {
     id: number,
     appellation: string,
     region: string,
-    millesime: number[],
-    quantite: number,
     couleur: string,
     cepage: string,
-    note: number,
     domaine: string,
+    mets: string[],
 }
 //bouteille.id_bouteille,
 // appellation.nom, 
@@ -48,7 +46,7 @@ type Mets = {
 type Cepage = {
     nom: string,
 }
-type Couleur = {
+type Millesime = {
     nom: string,
 }
 export default function Index() {
@@ -56,10 +54,11 @@ export default function Index() {
   const [loading, setLoading] = useState(true);
 
   const [data, setData] = useState<Wine[]>([])
+  //const [dataFull, setDataFull] = useState<WineFull[]>([])
   const [regions, setRegions] = useState<Region[]>([])
   const [mets, setMets] = useState<Mets[]>([])
   const [cepages, setCepages] = useState<Cepage[]>([])
-  const [couleurs, setCouleurs] = useState<Couleur[]>([])
+  const [millesime, setMillesime] = useState<Millesime[]>([{nom: "-5ans"},{nom: "5-10ans"},{nom: "10-20ans"},{nom: "+20ans"}])
 
   // console.log("regions = ",regions);
 
@@ -72,24 +71,63 @@ export default function Index() {
     setData(res);
     };
 
-    const loadWines = async () => {
+    /*const loadWines = async () => {
         //console.log("Fetching bouteilles");
         try{
             const res = await database.getAllAsync<Wine>('SELECT vin.id_vin as id,appellation.nom_a as appellation,domaine.nom_d as domaine,region.nom_r as region,couleur.nom_co as couleur,cepage.nom_ce as cepage FROM vin, appellation, region, couleur, cepage, domaine WHERE vin.id_appellation = appellation.id_appellation AND vin.id_region=region.id_region AND vin.id_couleur=couleur.id_couleur AND vin.id_cepage=cepage.id_cepage AND vin.id_domaine=domaine.id_domaine;');
+            //const res_mets = await database.getAllAsync<Mets>('SELECT mets.nom_m as nom FROM vin, marie, mets WHERE vin.id_vin = marie.id_vin AND mets.id_mets = marie.id_mets AND vin.id_vin=$id;', {id: });
             setData(res);
+            res.map(async (wine) => {
+                const res_mets = await database.getAllAsync<Mets>('SELECT mets.nom_m as nom FROM vin, marie, mets WHERE vin.id_vin = marie.id_vin AND mets.id_mets = marie.id_mets AND vin.id_vin=$id;', {id: wine.id});
+                setDataFull([...dataFull, {id: wine.id, appellation: wine.appellation, region: wine.region, couleur: wine.couleur, cepage: wine.cepage, domaine: wine.domaine, mets: res_mets.map((mets) => mets.nom)}]);
+                //console.log("res_mets = ",wine,res_mets);
+            });
             setLoading(false);
         }catch(e){
             console.log("Error fetching bouteilles = ",e);
         }
         //const test = await database.getEachAsync<Wine>('SELECT vin.id_vin as id,appellation.nom_a as appellation,domaine.nom_d as domaine,region.nom_r as region,couleur.nom_co as couleur,cepage.nom_ce as cepage FROM vin, appellation, region, couleur, cepage, domaine WHERE vin.id_appellation = appellation.id_appellation AND vin.id_region=region.id_region AND vin.id_couleur=couleur.id_couleur AND vin.id_cepage=cepage.id_cepage AND vin.id_domaine=domaine.id_domaine;');
         //var i = 0;
-        /*for await (const wine of test) {
+        for await (const wine of test) {
             i++;
-        }*/
+        }
         //console.log("test size = ",i);
         // console.log("res wine = ",res);
         //console.log("data size = ",data.length);
-        };
+        };*/
+
+    const loadWines = async () => {
+        try{
+            const res: Wine[] = [];
+            //const res_mets = await database.getAllAsync(`SELECT mets.nom_m as nom FROM vin, marie, mets WHERE vin.id_vin = marie.id_vin AND mets.id_mets = marie.id_mets AND vin.id_vin=?;`, [1]);
+            
+            //const res_tab = await database.getAllAsync<WineTemp>('SELECT vin.id_vin as id,appellation.nom_a as appellation,domaine.nom_d as domaine,region.nom_r as region,couleur.nom_co as couleur,cepage.nom_ce as cepage FROM vin, appellation, region, couleur, cepage, domaine WHERE vin.id_appellation = appellation.id_appellation AND vin.id_region=region.id_region AND vin.id_couleur=couleur.id_couleur AND vin.id_cepage=cepage.id_cepage AND vin.id_domaine=domaine.id_domaine;');
+            //console.log("res_tab = ",res_tab.length);
+            const wineIterator = await database.getEachAsync<WineTemp>('SELECT vin.id_vin as id,appellation.nom_a as appellation,domaine.nom_d as domaine,region.nom_r as region,couleur.nom_co as couleur,cepage.nom_ce as cepage FROM vin, appellation, region, couleur, cepage, domaine WHERE vin.id_appellation = appellation.id_appellation AND vin.id_region=region.id_region AND vin.id_couleur=couleur.id_couleur AND vin.id_cepage=cepage.id_cepage AND vin.id_domaine=domaine.id_domaine;');
+            for await (const wine of wineIterator) {
+                //console.log("wine id = ",wine.id);
+                try{
+                    const res_mets = await database.getAllAsync<Mets>('SELECT mets.nom_m as nom FROM vin, marie, mets WHERE vin.id_vin = marie.id_vin AND mets.id_mets = marie.id_mets AND vin.id_vin=$id;', {$id: wine.id});
+                    //console.log("res_mets = ",res_mets);
+                    res.push({id: wine.id, appellation: wine.appellation, region: wine.region, couleur: wine.couleur, cepage: wine.cepage, domaine: wine.domaine, mets: res_mets.map((mets) => mets.nom)});
+                    //setData([...data, {id: wine.id, appellation: wine.appellation, region: wine.region, couleur: wine.couleur, cepage: wine.cepage, domaine: wine.domaine, mets: res_mets.map((mets) => mets.nom)}]);
+                    //console.log("data = ",dataFull);
+                }catch(e){
+                    console.log("Error fetching mets = ",e);
+                }
+                /*const res_mets = await database.getAllAsync<Mets>('SELECT mets.nom_m as nom FROM vin, marie, mets WHERE vin.id_vin = marie.id_vin AND mets.id_mets = marie.id_mets AND vin.id_vin=$id;', {id: wine.id});
+                console.log("res_mets = ",res_mets);
+                setDataFull([...dataFull, {id: wine.id, appellation: wine.appellation, region: wine.region, couleur: wine.couleur, cepage: wine.cepage, domaine: wine.domaine, mets: res_mets.map((mets) => mets.nom)}]);
+                //console.log("wine = ",wine,res_mets);*/
+            }
+            setData(res);
+            //console.log("data = ",res.length);
+            setLoading(false);
+        }catch(e){
+            console.log("Error fetching bouteilles = ",e);
+        }
+    };
+
 
     const loadRegions = async () => {
         const res = await database.getAllAsync<Region>('SELECT nom_r as nom FROM region;');
@@ -109,11 +147,11 @@ export default function Index() {
         setCepages(res);
         };
     
-    const loadCouleurs = async () => {
+    /*const loadCouleurs = async () => {
         const res = await database.getAllAsync<Couleur>('SELECT nom_co as nom FROM couleur;');
         // console.log("res = ",res);
         setCouleurs(res);
-        };
+        };*/
 
     useFocusEffect(
         useCallback(() => {
@@ -121,14 +159,14 @@ export default function Index() {
             loadRegions();
             loadMets();
             loadCepages();
-            loadCouleurs();
+            //loadCouleurs();
             loadWines();
         }, [])
     );
 
     // État pour les filtres sélectionnés
     const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
-    const [selectedCouleurs, setSelectedCouleurs] = useState<string[]>([]);
+    const [selectedMillesime, setSelectedMillesime] = useState<string[]>([]);
     const [selectedCepages, setSelectedCepages] = useState<string[]>([]);
     const [selectedMets, setSelectedMets] = useState<string[]>([]);
     /*<SafeAreaView style={{
@@ -174,15 +212,15 @@ export default function Index() {
             value={{selectedFilters: selectedRegions, setSelectedFilters: setSelectedRegions}}>
                 <CepagesContext.Provider
                 value={{selectedFilters: selectedCepages, setSelectedFilters: setSelectedCepages}}>
-                    <CouleursContext.Provider
-                    value={{selectedFilters: selectedCouleurs, setSelectedFilters: setSelectedCouleurs}}>
+                    <MillesimeContext.Provider
+                    value={{selectedFilters: selectedMillesime, setSelectedFilters: setSelectedMillesime}}>
                         <MetsContext.Provider
                         value={{selectedFilters: selectedMets, setSelectedFilters: setSelectedMets}}>
 
-            <FilterSection regions={regions} mets={mets} cepages={cepages} couleurs={couleurs}/>
+            <FilterSection regions={regions} mets={mets} cepages={cepages} millesimes={millesime}/>
             <WineSection data={data}/>
             </MetsContext.Provider>
-            </CouleursContext.Provider>
+            </MillesimeContext.Provider>
             </CepagesContext.Provider>
             </RegionsContext.Provider>
         </ScrollView>

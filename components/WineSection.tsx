@@ -13,19 +13,19 @@ region: string;
 grape: string;
 }*/
 
-import { CepagesContext, CouleursContext, MetsContext, RegionsContext } from './Contexts';
-
-type WineOld = {
-    domaine: number,
-    appellation: number,
-    region: number,
-    millesime: number,
-    quantite: number,
-    couleur: number,
-    cepage: number,
-}
+import { CepagesContext, MillesimeContext, MetsContext, RegionsContext } from './Contexts';
 
 type Wine = {
+    id: number,
+    appellation: string,
+    region: string,
+    couleur: string,
+    cepage: string,
+    domaine: string,
+    mets: string[],
+}
+
+type WineTemp = {
     id: number,
     appellation: string,
     region: string,
@@ -92,15 +92,16 @@ const wines: WineZ[] = [
 //props: { data: Wine[] }
 export default function WineSection(props: { data: Wine[] }) {
     const {selectedFilters: selectedRegions, setSelectedFilters: setSelectedRegions} = useContext(RegionsContext);
-    const {selectedFilters: selectedCouleurs, setSelectedFilters: setSelectedCouleurs} = useContext(CouleursContext);
+    const {selectedFilters: selectedMillesime, setSelectedFilters: setSelectedMillesime} = useContext(MillesimeContext);
     const {selectedFilters: selectedCepages, setSelectedFilters: setSelectedCepages} = useContext(CepagesContext);
     const {selectedFilters: selectedMets, setSelectedFilters: setSelectedMets} = useContext(MetsContext);
 
     const filteredWines = props.data.filter(wine => {
         const regionMatch = selectedRegions.length === 0 || selectedRegions.includes(wine.region);
-        const couleurMatch = selectedCouleurs.length === 0 || selectedCouleurs.includes(wine.couleur);
+        const couleurMatch = selectedMillesime.length === 0 || selectedMillesime.includes(wine.couleur);
         const cepageMatch = selectedCepages.length === 0 || selectedCepages.includes(wine.cepage);
-        return regionMatch && couleurMatch && cepageMatch;
+        const metsMatch = selectedMets.length === 0 || selectedMets.some(met => wine.mets.includes(met));
+        return regionMatch && couleurMatch && cepageMatch && metsMatch;
     });
 
     return (

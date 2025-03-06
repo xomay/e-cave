@@ -16,6 +16,13 @@ type WineDetails = {
   note: number,
 }
 
+//TODO : autoincrement les id
+// TODO : champs : domaine, appellation, region, millesime, quantite, couleur, cepage, note, type
+// TODO : aucomplétion par les valeurs connues
+// TODO : vérification si valeurs inconnues -> ajout
+// TODO : vérification si pas déjà existante -> ajout
+// TODO : si déjà connue : UPDATE
+
 export default function editPage() {
     // gat the id from the url
   const { id } = useLocalSearchParams<{id:string}>();

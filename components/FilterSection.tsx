@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Image, FlatList } from 'react-native';
 
-import { RegionsContext, MetsContext, CepagesContext, CouleursContext } from './Contexts';
+import { RegionsContext, MetsContext, CepagesContext, MillesimeContext } from './Contexts';
 
 import {colors} from '@/constants/colors';
 import {fonts} from '@/constants/fonts';
@@ -15,7 +15,7 @@ const cardData = [
     { id: '4', title: 'Pinot Noir', filter: 'Cépage' },
 ];
 
-const regionImages = 
+export const regionImages = 
     [
       {
         region : "Bordeaux",
@@ -62,7 +62,7 @@ const regionImages =
       }
     ];
 
-const millesimeImage = 
+export const millesimeImage = 
 [
     {
     millesime : "-5ans",
@@ -82,11 +82,39 @@ const millesimeImage =
     },
 ];
 
-const metsImage = 
+export const metsImage = 
 [
     {
-    region : "Bordeaux",
-    image: require('@/assets/images/regions/Bordeaux.png'),
+    mets : "Cuisine",
+    image: require('@/assets/images/mets/Cuisine.png'),
+    },
+    {
+    mets : "Fromage",
+    image: require('@/assets/images/mets/Fromage.png'),
+    },
+    {
+    mets : "Viande rouge",
+    image: require('@/assets/images/mets/Viande rouge.png'),
+    },
+    {
+    mets : "Apero",
+    image: require('@/assets/images/mets/Apero.png'),
+    },
+    {
+    mets : "Poisson",
+    image: require('@/assets/images/mets/Poisson.png'),
+    },
+    {
+    mets : "Entree",
+    image: require('@/assets/images/mets/Entree.png'),
+    },
+    {
+    mets : "Coquillages",
+    image: require('@/assets/images/mets/Coquillages.png'),
+    },
+    {
+    mets : "Crepes",
+    image: require('@/assets/images/mets/Crepes.png'),
     },
 ];
 
@@ -99,7 +127,7 @@ type Mets = {
 type Cepage = {
     nom: string,
 }
-type Couleur = {
+type Millesime = {
     nom: string,
 }
 
@@ -109,13 +137,13 @@ export const MetsContext = createContext<string[]>([]);
 export const CepagesContext = createContext<string[]>([]);
 export const CouleursContext = createContext<string[]>([]);
 */
-export default function FilterSection(props: {regions: Region[], mets: Mets[], cepages: Cepage[], couleurs: Couleur[]}) {
+export default function FilterSection(props: {regions: Region[], mets: Mets[], cepages: Cepage[], millesimes: Millesime[]}) {
     const [activeBtn, setActiveBtn] = useState<string>('Mets')
 
     const Regions = useContext(RegionsContext);
     const Mets = useContext(MetsContext);
     const Cepages = useContext(CepagesContext);
-    const Couleurs = useContext(CouleursContext);
+    const Millesime = useContext(MillesimeContext);
 
     const selectedRegions = Regions.selectedFilters;
     const setSelectedRegions = Regions.setSelectedFilters;
@@ -123,26 +151,26 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
     const setSelectedMets = Mets.setSelectedFilters;
     const selectedCepages = Cepages.selectedFilters;
     const setSelectedCepages = Cepages.setSelectedFilters;
-    const selectedCouleurs = Couleurs.selectedFilters;
-    const setSelectedCouleurs = Couleurs.setSelectedFilters;
+    const selectedMillesime = Millesime.selectedFilters;
+    const setSelectedMillesime = Millesime.setSelectedFilters;
 
     const regions = props.regions;
     const mets = props.mets;
     const cepages = props.cepages;
-    const couleurs = props.couleurs;
-    const millesime = [{nom: "-5ans"}, {nom: "5-10ans"}, {nom: "10-20ans"}, {nom: "+20ans"}];
+    const millesimes = props.millesimes;
+    //const millesime = [{nom: "-5ans"}, {nom: "5-10ans"}, {nom: "10-20ans"}, {nom: "+20ans"}];
     const filters= {
         regions: regions, 
         mets: mets, 
         cepages: cepages, 
-        millesime: millesime};
+        millesime: millesimes};
     /*console.log("filters = ",filters);
     console.log("regions = ",regions);*/
     const filtersss = [
         { value: regions, filter: 'Région' },
         { value: mets, filter: 'Mets' },
         { value: cepages, filter: 'Cépage' },
-        { value: millesime, filter: 'Millésime' },
+        { value: millesimes, filter: 'Millésime' },
     ];
 
     const handleFilterPress = (button:string) => {
@@ -167,8 +195,8 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
                     prev.includes(value) ? prev.filter(r => r !== value) : [...prev, value]
                 );
                 break;
-            case 'Couleur':
-                setSelectedCouleurs(prev =>
+            case 'Millésime':
+                setSelectedMillesime(prev =>
                     prev.includes(value) ? prev.filter(c => c !== value) : [...prev, value]
                 );
                 break;
@@ -219,20 +247,21 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cardScroll}>
                 {filtersss.
                 filter((filtre) => filtre.filter === activeBtn)[0].value
-                .map((el) =>
+                .map((el, index) =>
                         <TouchableOpacity key={`${el.nom}-${selectedRegions.includes(el.nom) || selectedCepages.includes(el.nom) 
-                            || selectedCouleurs.includes(el.nom)
+                            || selectedMillesime.includes(el.nom)
                             || selectedMets.includes(el.nom) ? 'selected' : 'not-selected'}`} 
                 style={[styles.card,{justifyContent: (activeBtn !== 'Millésime') ? 'space-between' : 'center'}, { backgroundColor: (selectedRegions.includes(el.nom) 
                     || selectedCepages.includes(el.nom) 
-                    || selectedCouleurs.includes(el.nom)
+                    || selectedMillesime.includes(el.nom)
                     || selectedMets.includes(el.nom)
-                )? colors.theme_orange : colors.tertiary_blue}]}
+                )? colors.theme_orange : colors.tertiary_blue}, {marginLeft: index === 0 ? 10 : 0}]}
                 onPress={() => toggleFilter(activeBtn, el.nom)}
                 >
                     {activeBtn === 'Région' ? <Image source={regionImages.find(region => region.region === el.nom)?.image} style={styles.imageCard} resizeMode="contain"/> : null}
                     {activeBtn === 'Cépage' ? <Image source={require('@/assets/images/cepages/Assemblage.png')} style={styles.imageCard} resizeMode="contain"/> : null}
                     {activeBtn === 'Millésime' ? <Image source={millesimeImage.find(millesime => millesime.millesime === el.nom)?.image} style={styles.imageCard} resizeMode="contain"/> : null}
+                    {activeBtn === 'Mets' ? <Image source={metsImage.find(mets => mets.mets === el.nom)?.image} style={styles.imageCard} resizeMode="contain"/> : null}
                             {activeBtn !== 'Millésime' ? <Text style={styles.cardText}>{el.nom}</Text> : null}
                         </TouchableOpacity>
                         )}
@@ -276,7 +305,7 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
 
 const styles = StyleSheet.create({
     container: {
-        padding: 10,
+        //padding: 10,
     },
     title: {
         fontSize: 22,
@@ -286,6 +315,9 @@ const styles = StyleSheet.create({
     buttonRow: {
         flexDirection: 'row',
         marginBottom: 16,
+        paddingTop: 10,
+        paddingLeft: 10,
+        paddingRight: 10,
     },
     filterButton: {
         //backgroundColor: '#6cbfd4',
