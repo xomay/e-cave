@@ -53,7 +53,7 @@ export default function wineDetails() {
   const [mets, setMets] = useState<Mets[]>([])
   
   const [selectedMillesime, setSelectedMillesime] = useState<number>(millesime[0]);
-  const [selectedFlacon, setSelectedFlacon] = useState<number>(0);
+  const [selectedFlacon, setSelectedFlacon] = useState<number>(flacon[0]);
   const [selectedWine, setSelectedWine] = useState<WineDetails | undefined>(data[0]);
 
   const [qte, setQte] = useState<number>(0);
@@ -63,8 +63,8 @@ export default function wineDetails() {
     const loadWine = async () => {
       const res = await database.getAllAsync<WineDetails>('SELECT bouteille.id_bouteille as id,bouteille.flacon as flacon, domaine.nom_d as domaine, appellation.nom_a as appellation, region.nom_r as region , bouteille.millesime as millesime, bouteille.quantite as quantite, couleur.nom_co as couleur, cepage.nom_ce as cepage,  bouteille.note as note, type.nom_t as type FROM vin, bouteille, domaine, appellation, region, couleur, cepage, type WHERE bouteille.id_vin = $idValue AND bouteille.id_vin=vin.id_vin AND vin.id_appellation=appellation.id_appellation AND vin.id_cepage=cepage.id_cepage AND vin.id_couleur=couleur.id_couleur AND vin.id_domaine=domaine.id_domaine AND vin.id_region=region.id_region AND vin.id_type=type.id_type;', {$idValue: id});
       setData(res);
-      //console.log("data = ",res);
       setLoading(false);
+      //console.log("data = ",res);
     }
 
     const loadMillesime = async () => {
@@ -84,7 +84,7 @@ export default function wineDetails() {
       
     }
     
-    /*const loadFlacon = async () => {
+    const loadFlacon = async () => {
       //setFlacon([data.find(wine => wine.flacon === flacon[0])?.flacon ?? 0]);
       setSelectedFlacon(data.find(wine => wine.flacon === flacon[0])?.flacon ?? 0);
       setFlacon([data.find(wine => wine.millesime === millesime[0])?.flacon ?? 0]);
@@ -97,14 +97,14 @@ export default function wineDetails() {
           setSelectedFlacon(row.flacon);
         }
         i++;
-      }
-    }*/
+      }*/
+    }
 
     const loadMets = async () => {
       try{
         const res = await database.getAllAsync<Mets>('SELECT mets.nom_m as mets FROM vin, marie, mets WHERE vin.id_vin = marie.id_vin AND mets.id_mets = marie.id_mets AND vin.id_vin=$id;', {$id: id});
         setMets(res);
-        //console.log("mets = ",res);
+        console.log("mets = ",res);
       }catch (error) {
         console.error('Erreur lors du chargement des mets :', error);
       }
@@ -114,18 +114,9 @@ export default function wineDetails() {
     useEffect(() => {
       if (millesime.length > 0) {
         setSelectedMillesime(millesime[0]);
-        const sWine: WineDetails | undefined = data.find(wine => wine.millesime === millesime[0]);
-        //console.log(sWine?.millesime);
-        setSelectedWine(sWine);
-        data.filter(wine => wine.millesime === sWine?.millesime).map((wine,index) => 
-          {if (!flacon.includes(wine.flacon)){
-            index === 0 ? setSelectedFlacon(wine.flacon) : null;
-            setFlacon(prev => [...prev, wine.flacon ?? 0]);
-            //console.log(wine.flacon);
-          }
-        })
-        //setSelectedFlacon(data.find(wine => wine.flacon === flacon[0])?.flacon ?? 0);
-        //setFlacon([data.find(wine => wine.millesime === millesime[0])?.flacon ?? 0]);
+        setSelectedWine(data.find(wine => wine.millesime === millesime[0]));
+        setSelectedFlacon(data.find(wine => wine.flacon === flacon[0])?.flacon ?? 0);
+        setFlacon([data.find(wine => wine.millesime === millesime[0])?.flacon ?? 0]);
         //console.log("selectedWine = ",data.find(wine => wine.millesime === millesime[0]));
       }
     }, [millesime]);
@@ -134,39 +125,19 @@ export default function wineDetails() {
       useCallback(() => {
         loadWine();
         loadMillesime();
-        //loadFlacon();
+        loadFlacon();
         loadMets();
       }, [])
     );
 
     const handleMillesimePress = (millesime: number) => {
-      //console.log("Bouton pressed")
       setSelectedMillesime(millesime);
-      var flaconTemp : number[] = [];
-      setFlacon([])
-      //setSelectedWine(data.find(wine => wine.millesime === millesime));
-      const sWine: WineDetails | undefined = data.find(wine => wine.millesime === millesime);
-      //console.log(sWine?.millesime);
-      setSelectedWine(sWine);
-      //console.log(sWine)
-      data.filter(wine => wine.millesime === sWine?.millesime).map((wine,index) => 
-        {
-          //index === 0 ? setSelectedFlacon(wine.flacon) : null;
-          if (!flaconTemp.includes(wine.flacon)){
-            flaconTemp.push(wine.flacon)
-            //console.log("Flacon add : ",wine.flacon);
-          }
-        })
-      setFlacon(flaconTemp);
-      setSelectedFlacon(flaconTemp[0])
+      setSelectedWine(data.find(wine => wine.millesime === millesime));
     }
 
     const handleFlaconPress = (flacon: number) => {
-      setSelectedFlacon(flacon);
-      const sWine = data.find(wine => wine.flacon === flacon && selectedWine?.millesime === wine.millesime)
-      //setSelectedWine(prev => data.find(wine => wine.flacon === flacon && prev?.millesime === wine.millesime));
-      setSelectedWine(sWine);
-      //console.log("selectedWine = ",sWine);
+      setSelectedMillesime(flacon);
+      setSelectedWine(data.find(wine => wine.flacon === flacon));
     }
 
     const image = regionImages.find(region => region.region === selectedWine?.region)?.image;
@@ -188,7 +159,7 @@ export default function wineDetails() {
       qte > 0 ? setQte(qte - 1) : null;
     } 
 
-    /*const handleUpdate = async () => {
+    const handleUpdate = async () => {
       const value = selectedWine?.quantite ?? 0;
       try {
         const test = await database.runAsync('UPDATE bouteille SET quantite = $quantite WHERE id_bouteille = $idValue;', {$quantite: qte, $idValue: value});
@@ -201,7 +172,7 @@ export default function wineDetails() {
         );
       }
       router.back();
-    }*/
+    }
 
     const handleTake = async () => {
       const value = selectedWine?.quantite ?? 0;
