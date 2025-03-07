@@ -56,6 +56,11 @@ export default function wineDetails() {
   const [selectedFlacon, setSelectedFlacon] = useState<number>(flacon[0]);
   const [selectedWine, setSelectedWine] = useState<WineDetails | undefined>(data[0]);
 
+  const[wineLoaded, setWineLoaded] = useState<boolean>(false);
+  const[millesimeLoaded, setMillesimeLoaded] = useState<boolean>(false);
+  const[flaconLoaded, setFlaconLoaded] = useState<boolean>(false);
+  const[metsLoaded, setMetsLoaded] = useState<boolean>(false);
+
   const [qte, setQte] = useState<number>(0);
 
   const[take, setTake] = useState<boolean>(true);
@@ -63,7 +68,7 @@ export default function wineDetails() {
     const loadWine = async () => {
       const res = await database.getAllAsync<WineDetails>('SELECT bouteille.id_bouteille as id,bouteille.flacon as flacon, domaine.nom_d as domaine, appellation.nom_a as appellation, region.nom_r as region , bouteille.millesime as millesime, bouteille.quantite as quantite, couleur.nom_co as couleur, cepage.nom_ce as cepage,  bouteille.note as note, type.nom_t as type FROM vin, bouteille, domaine, appellation, region, couleur, cepage, type WHERE bouteille.id_vin = $idValue AND bouteille.id_vin=vin.id_vin AND vin.id_appellation=appellation.id_appellation AND vin.id_cepage=cepage.id_cepage AND vin.id_couleur=couleur.id_couleur AND vin.id_domaine=domaine.id_domaine AND vin.id_region=region.id_region AND vin.id_type=type.id_type;', {$idValue: id});
       setData(res);
-      setLoading(false);
+      setWineLoaded(true);
       //console.log("data = ",res);
     }
 
@@ -77,6 +82,7 @@ export default function wineDetails() {
           setMillesime(prev => [...prev, row.millesime]);
           setSelectedMillesime(millesime[0]);
         }
+        setMillesimeLoaded(true);
       }catch (error) {
           console.error('Erreur lors du chargement des millésimes :', error);
       }
@@ -88,6 +94,7 @@ export default function wineDetails() {
       //setFlacon([data.find(wine => wine.flacon === flacon[0])?.flacon ?? 0]);
       setSelectedFlacon(data.find(wine => wine.flacon === flacon[0])?.flacon ?? 0);
       setFlacon([data.find(wine => wine.millesime === millesime[0])?.flacon ?? 0]);
+      setFlaconLoaded(true);
       //console.log("flacon = ", selectedWine)
       /*var i = 0;
       const res = database.getEachAsync<Flacon>('SELECT DISTINCT(bouteille.flacon) as flacon FROM bouteille WHERE bouteille.id_vin = $idValue ORDER BY flacon ASC;', {$idValue: id});
@@ -105,6 +112,7 @@ export default function wineDetails() {
         const res = await database.getAllAsync<Mets>('SELECT mets.nom_m as mets FROM vin, marie, mets WHERE vin.id_vin = marie.id_vin AND mets.id_mets = marie.id_mets AND vin.id_vin=$id;', {$id: id});
         setMets(res);
         console.log("mets = ",res);
+        setMetsLoaded(true);
       }catch (error) {
         console.error('Erreur lors du chargement des mets :', error);
       }
@@ -220,7 +228,7 @@ export default function wineDetails() {
     
     //console.log("selectedMillesime = ",millesime);
     //console.log("selectedMillesime = ",selectedMillesime);
-    if (loading) {
+    if (!(wineLoaded && millesimeLoaded && flaconLoaded && metsLoaded)) {
             return (
             <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                 <ActivityIndicator size="large" color="#000" />
