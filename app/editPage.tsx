@@ -3,7 +3,8 @@ import { fonts } from '@/constants/fonts';
 import { router, Stack, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 type WineDetails = {
   id: number,
@@ -121,6 +122,7 @@ export default function editPage() {
     const ite = database.getEachAsync<{nom: string}>(`SELECT nom_a as nom FROM appellation`);
     for await (const v of ite)  {
       setAppellations((prev) => [...prev, v.nom]);
+      setAppellationFiltered((prev) => [...prev, v.nom]);
       //console.log(d.nom);
     }
     setAppellationLoaded(true);
@@ -131,6 +133,7 @@ export default function editPage() {
     const ite = database.getEachAsync<{nom: string}>(`SELECT nom_r as nom FROM region`);
     for await (const v of ite)  {
       setRegions((prev) => [...prev, v.nom]);
+      setRegionFiltered((prev) => [...prev, v.nom]);
       //console.log(d.nom);
     }
     setRegionLoaded(true);
@@ -141,6 +144,7 @@ export default function editPage() {
     const ite = database.getEachAsync<{nom: string}>(`SELECT nom_co as nom FROM couleur`);
     for await (const v of ite)  {
       setCouleurs((prev) => [...prev, v.nom]);
+      setCouleurFiltered((prev) => [...prev, v.nom]);
       //console.log(d.nom);
     }
     setCouleurLoaded(true);
@@ -151,6 +155,7 @@ export default function editPage() {
     const ite = database.getEachAsync<{nom: string}>(`SELECT nom_ce as nom FROM cepage`);
     for await (const v of ite)  {
       setCepages((prev) => [...prev, v.nom]);
+      setCepageFiltered((prev) => [...prev, v.nom]);
       //console.log(d.nom);
     }
     setCepageLoaded(true);
@@ -161,6 +166,7 @@ export default function editPage() {
     const ite = database.getEachAsync<{nom: string}>(`SELECT nom_t as nom FROM type`);
     for await (const v of ite)  {
       setTypes((prev) => [...prev, v.nom]);
+      setTypeFiltered((prev) => [...prev, v.nom]);
       //console.log(d.nom);
     }
     setTypeLoaded(true);
@@ -202,35 +208,53 @@ export default function editPage() {
     cepage: number,
   }
 
-
-  const domainesList = useMemo(() => (
-    <ScrollView
-      nestedScrollEnabled={true}
-      style={{width: '100%', height: domaineInputSelected ? 300 : 0,}}
-      contentContainerStyle={{alignItems: 'center', justifyContent: 'center', gap: 5,}}
-    >
-      {domaines.map((d, index) => (
-        <TouchableOpacity 
-          style={{ height: 30, width: '100%' , backgroundColor: colors.tertiary_blue}} 
-          onPress={() => {
-            console.log("Pressed : ", d);
-            setDomaineInput(d);
-          }}
-          key={index}
-        >
-          <Text>{d}</Text>
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
-  ), [domaines]);
-
   const getDomaineQuery = (text: string) => {
     return domaines.filter((d) => d.includes(text));
+  }
+
+  const getAppellationQuery = (text: string) => {
+    return appellations.filter((d) => d.includes(text));
+  }
+
+  const getRegionQuery = (text: string) => {
+    return regions.filter((d) => d.includes(text));
+  }
+
+  const getCouleurQuery = (text: string) => {
+    return couleurs.filter((d) => d.includes(text));
+  }
+
+  const getCepageQuery = (text: string) => {
+    return cepages.filter((d) => d.includes(text));
+  }
+
+  const getTypeQuery = (text: string) => {
+    return types.filter((d) => d.includes(text));
   }
 
   useEffect(() => {
     setDomaineFiltered(getDomaineQuery(domaineInput));
   }, [domaineInput]);
+
+  useEffect(() => {
+    setAppellationFiltered(getAppellationQuery(appellationInput));
+  }, [appellationInput]);
+
+  useEffect(() => {
+    setRegionFiltered(getRegionQuery(regionInput));
+  }, [regionInput]);
+
+  useEffect(() => {
+    setCouleurFiltered(getCouleurQuery(couleurInput));
+  }, [couleurInput]);
+
+  useEffect(() => {
+    setCepageFiltered(getCepageQuery(cepageInput));
+  }, [cepageInput]);
+
+  useEffect(() => {
+    setTypeFiltered(getTypeQuery(typeInput));
+  }, [typeInput]);
 
   if (!((editMode ? dataLoaded : true) && domaineLoaded && appellationLoaded && regionLoaded && couleurLoaded && cepageLoaded && typeLoaded)) {
     return (
@@ -259,6 +283,7 @@ export default function editPage() {
         keyboardDismissMode="on-drag"
       >
 
+        {/*------------DOMAINE--------------------------*/}
         <Text style={styles.title}>Domaine</Text>
         <TextInput
           placeholder="Domaine"
@@ -312,22 +337,114 @@ export default function editPage() {
         }
         </View>
 
+        {/*------------APPELLATION--------------------------*/}
         <Text style={styles.title}>Appellation</Text>
         <TextInput
           placeholder="Appellation"
-          value={wine?.appellation}
-          keyboardType="email-address"
-          onChangeText={(text) => setEmail(text)}
+          value={wine?.appellation ?? appellationInput}
+          onChangeText={(text) => {setAppellationInput(text)}}
           style={styles.textInput}
-        />
-        <Text style={styles.title}>Region</Text>
+          autoComplete="off"
+          autoCorrect={false}
+          onFocus={() => {
+            setAppellationInputSelected(true)
+          }}
+          onBlur={() => {
+            setAppellationInputSelected(false)
+          }}
+          />
+
+        <View style={{width: '100%', 
+          height: appellationInputSelected ? 150 : 0,
+          //height: 100,
+          }}>
+
+          {
+        <ScrollView
+          key={appellationFiltered.join(',')}
+          nestedScrollEnabled={true}
+          style={{width: '100%', height: 150,}}
+          contentContainerStyle={{alignItems: 'center', justifyContent: 'center', gap: 5,}}
+          removeClippedSubviews={false}
+          showsVerticalScrollIndicator={true}
+          indicatorStyle="black"
+          keyboardShouldPersistTaps="handled"
+          >
+          {appellationFiltered.map((v, index) => (
+            <TouchableOpacity 
+            style={{
+              height: 30, 
+              width: '100%' , 
+              //backgroundColor: colors.tertiary_blue, 
+              justifyContent: 'center',
+            }} 
+            onPress={() => {
+              console.log("Pressed : ", v);
+              setAppellationInput(v);
+            }}
+            key={index}
+            >
+              <Text style={{fontFamily: fonts.sfmedium, paddingLeft: 5}}>{v}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        }
+        </View>
+
+        {/*------------REGION--------------------------*/}
+        <Text style={styles.title}>Région</Text>
         <TextInput
           placeholder="Region"
-          value={wine?.region}
-          keyboardType="email-address"
-          onChangeText={(text) => setEmail(text)}
+          value={wine?.region ?? regionInput}
+          onChangeText={(text) => {setRegionInput(text)}}
           style={styles.textInput}
-        />
+          autoComplete="off"
+          autoCorrect={false}
+          onFocus={() => {
+            setRegionInputSelected(true)
+          }}
+          onBlur={() => {
+            setRegionInputSelected(false)
+          }}
+          />
+
+        <View style={{width: '100%', 
+          height: regionInputSelected ? 150 : 0,
+          //height: 100,
+          }}>
+
+          {
+        <ScrollView
+          key={regionFiltered.join(',')}
+          nestedScrollEnabled={true}
+          style={{width: '100%', height: 150,}}
+          contentContainerStyle={{alignItems: 'center', justifyContent: 'center', gap: 5,}}
+          removeClippedSubviews={false}
+          showsVerticalScrollIndicator={true}
+          indicatorStyle="black"
+          keyboardShouldPersistTaps="handled"
+          >
+          {regionFiltered.map((v, index) => (
+            <TouchableOpacity 
+            style={{
+              height: 30, 
+              width: '100%' , 
+              //backgroundColor: colors.tertiary_blue, 
+              justifyContent: 'center',
+            }} 
+            onPress={() => {
+              console.log("Pressed : ", v);
+              setRegionInput(v);
+            }}
+            key={index}
+            >
+              <Text style={{fontFamily: fonts.sfmedium, paddingLeft: 5}}>{v}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        }
+        </View>
+
         <Text style={styles.title}>Millésime</Text>
         <TextInput
           placeholder="Millésime"
@@ -336,22 +453,115 @@ export default function editPage() {
           onChangeText={(text) => setEmail(text)}
           style={styles.textInput}
         />
+
+        {/*------------COULEUR--------------------------*/}
         <Text style={styles.title}>Couleur</Text>
         <TextInput
           placeholder="Couleur"
-          value={wine?.couleur}
-          keyboardType="email-address"
-          onChangeText={(text) => setEmail(text)}
+          value={wine?.couleur ?? couleurInput}
+          onChangeText={(text) => {setCouleurInput(text)}}
           style={styles.textInput}
-        />
-        <Text style={styles.title}>Cepage</Text>
+          autoComplete="off"
+          autoCorrect={false}
+          onFocus={() => {
+            setCouleurInputSelected(true)
+          }}
+          onBlur={() => {
+            setCouleurInputSelected(false)
+          }}
+          />
+
+        <View style={{width: '100%', 
+          height: couleurInputSelected ? 150 : 0,
+          //height: 100,
+          }}>
+
+          {
+        <ScrollView
+          key={couleurFiltered.join(',')}
+          nestedScrollEnabled={true}
+          style={{width: '100%', height: 150,}}
+          contentContainerStyle={{alignItems: 'center', justifyContent: 'center', gap: 5,}}
+          removeClippedSubviews={false}
+          showsVerticalScrollIndicator={true}
+          indicatorStyle="black"
+          keyboardShouldPersistTaps="handled"
+          >
+          {couleurFiltered.map((v, index) => (
+            <TouchableOpacity 
+            style={{
+              height: 30, 
+              width: '100%' , 
+              //backgroundColor: colors.tertiary_blue, 
+              justifyContent: 'center',
+            }} 
+            onPress={() => {
+              console.log("Pressed : ", v);
+              setCouleurInput(v);
+            }}
+            key={index}
+            >
+              <Text style={{fontFamily: fonts.sfmedium, paddingLeft: 5}}>{v}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        }
+        </View>
+
+        {/*------------CEPAGE--------------------------*/}
+        <Text style={styles.title}>Cépage</Text>
         <TextInput
           placeholder="Cepage"
-          value={wine?.cepage}
-          keyboardType="email-address"
-          onChangeText={(text) => setEmail(text)}
+          value={wine?.cepage ?? cepageInput}
+          onChangeText={(text) => {setCepageInput(text)}}
           style={styles.textInput}
-        />
+          autoComplete="off"
+          autoCorrect={false}
+          onFocus={() => {
+            setCepageInputSelected(true)
+          }}
+          onBlur={() => {
+            setCepageInputSelected(false)
+          }}
+          />
+
+        <View style={{width: '100%', 
+          height: cepageInputSelected ? 150 : 0,
+          //height: 100,
+          }}>
+
+          {
+        <ScrollView
+          key={cepageFiltered.join(',')}
+          nestedScrollEnabled={true}
+          style={{width: '100%', height: 150,}}
+          contentContainerStyle={{alignItems: 'center', justifyContent: 'center', gap: 5,}}
+          removeClippedSubviews={false}
+          showsVerticalScrollIndicator={true}
+          indicatorStyle="black"
+          keyboardShouldPersistTaps="handled"
+          >
+          {cepageFiltered.map((v, index) => (
+            <TouchableOpacity 
+            style={{
+              height: 30, 
+              width: '100%' , 
+              //backgroundColor: colors.tertiary_blue, 
+              justifyContent: 'center',
+            }} 
+            onPress={() => {
+              console.log("Pressed : ", v);
+              setCepageInput(v);
+            }}
+            key={index}
+            >
+              <Text style={{fontFamily: fonts.sfmedium, paddingLeft: 5}}>{v}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        }
+        </View>
+
         <Text style={styles.title}>Quantite</Text>
         <TextInput
           placeholder="Cepage"
@@ -368,19 +578,69 @@ export default function editPage() {
           onChangeText={(text) => setEmail(text)}
           style={styles.textInput}
         />
+
+        {/*------------TYPE--------------------------*/}
+
+        
+
         <Text style={styles.title}>Type</Text>
         <TextInput
-          placeholder="Cepage"
-          value={wine?.type}
-          keyboardType="email-address"
-          onChangeText={(text) => setEmail(text)}
+          placeholder="Type"
+          value={wine?.type ?? typeInput}
+          onChangeText={(text) => {setTypeInput(text)}}
           style={styles.textInput}
-        />
+          autoComplete="off"
+          autoCorrect={false}
+          onFocus={() => {
+            setTypeInputSelected(true)
+          }}
+          onBlur={() => {
+            setTypeInputSelected(false)
+          }}
+          />
+
+        <View style={{width: '100%', 
+          height: typeInputSelected ? 150 : 0,
+          //height: 100,
+        }}>
+
+          {
+            <ScrollView
+            key={typeFiltered.join(',')}
+            nestedScrollEnabled={true}
+            style={{width: '100%', height: 150,}}
+            contentContainerStyle={{alignItems: 'center', justifyContent: 'center', gap: 5,}}
+            removeClippedSubviews={false}
+            showsVerticalScrollIndicator={true}
+            indicatorStyle="black"
+            keyboardShouldPersistTaps="handled"
+            >
+          {typeFiltered.map((v, index) => (
+            <TouchableOpacity 
+            style={{
+              height: 30, 
+              width: '100%' , 
+              //backgroundColor: colors.tertiary_blue, 
+              justifyContent: 'center',
+            }} 
+            onPress={() => {
+              console.log("Pressed : ", v);
+              setTypeInput(v);
+            }}
+            key={index}
+            >
+              <Text style={{fontFamily: fonts.sfmedium, paddingLeft: 5}}>{v}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        }
+        </View>
+
       <View style={{ flexDirection: "row", gap: 20 }}>
         <TouchableOpacity
           onPress={() => router.back()}
           style={[styles.button, { backgroundColor: "red" }]}
-        >
+          >
           <Text style={styles.buttonText}>Cancel</Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -392,8 +652,9 @@ export default function editPage() {
           <Text style={styles.buttonText}>{editMode ? "Update" : "Save"}</Text>
         </TouchableOpacity>
       </View>
-          <View style={{width: '100%', height: 200}}/>
+          <View style={{width: '100%', height: 500}}/>
       </ScrollView>
+
     </SafeAreaView>
   );
 }
