@@ -679,6 +679,10 @@ export default function editPage() {
           }
           </View>
 
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cardScroll}>
+            
+          </ScrollView>
+
         <View style={{ flexDirection: "row", gap: 20, alignContent: "space-between" }}>
           <TouchableOpacity
             onPress={() => router.back()}
@@ -742,6 +746,13 @@ const styles = StyleSheet.create({
     borderColor: "slategray",
     maxHeight: 40,
     
+  },
+  cardScroll: {
+    // width determined by content
+    width: '100%',
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
+    marginBottom: 20,
   },
   button: {
     height: 40,

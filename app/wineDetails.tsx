@@ -82,7 +82,10 @@ export default function wineDetails() {
           setMillesime(prev => [...prev, row.millesime]);
           setSelectedMillesime(millesime[0]);
         }
+        //console.log("test : ", [data.find(wine => wine.millesime === millesime[0])?.flacon ?? 0])
+        setFlacon([data.find(wine => wine.millesime === millesime[0])?.flacon ?? 0]);
         setMillesimeLoaded(true);
+        setFlaconLoaded(true);
       }catch (error) {
           console.error('Erreur lors du chargement des millésimes :', error);
       }
@@ -92,8 +95,8 @@ export default function wineDetails() {
     
     const loadFlacon = async () => {
       //setFlacon([data.find(wine => wine.flacon === flacon[0])?.flacon ?? 0]);
-      setSelectedFlacon(data.find(wine => wine.flacon === flacon[0])?.flacon ?? 0);
       setFlacon([data.find(wine => wine.millesime === millesime[0])?.flacon ?? 0]);
+      setSelectedFlacon(data.find(wine => wine.flacon === flacon[0])?.flacon ?? 0);
       setFlaconLoaded(true);
       //console.log("flacon = ", selectedWine)
       /*var i = 0;
@@ -122,9 +125,17 @@ export default function wineDetails() {
     useEffect(() => {
       if (millesime.length > 0) {
         setSelectedMillesime(millesime[0]);
+        //console.log("Millesime : ", millesime[0]);
+        const sWine: WineDetails = data.find(wine => wine.millesime === millesime[0]) ?? data[0];
+        //console.log("selectedWine = ",sWine);
+        //console.log("Data 0 : ",data[0]);
         setSelectedWine(data.find(wine => wine.millesime === millesime[0]));
-        setSelectedFlacon(data.find(wine => wine.flacon === flacon[0])?.flacon ?? 0);
-        setFlacon([data.find(wine => wine.millesime === millesime[0])?.flacon ?? 0]);
+        //setFlacon([data.find(wine => wine.millesime === millesime[0])?.flacon ?? 0]);
+        setFlacon(data.filter(wine => wine.millesime === millesime[0]).map(wine => wine?.flacon));
+
+        //console.log("flacon = ",[data.find(wine => wine.millesime === millesime[0])?.flacon ?? 0]);
+        setSelectedFlacon(data.find(wine => wine.millesime === millesime[0])?.flacon ?? 0);
+        //setSelectedFlacon(data.find(wine => wine.flacon === flacon[0])?.flacon ?? 0);
         //console.log("selectedWine = ",data.find(wine => wine.millesime === millesime[0]));
       }
     }, [millesime]);
@@ -133,19 +144,26 @@ export default function wineDetails() {
       useCallback(() => {
         loadWine();
         loadMillesime();
-        loadFlacon();
+        //loadFlacon();
         loadMets();
       }, [])
     );
 
     const handleMillesimePress = (millesime: number) => {
       setSelectedMillesime(millesime);
+      const sWine: WineDetails = data.find(wine => wine.millesime === millesime) ?? data[0];
       setSelectedWine(data.find(wine => wine.millesime === millesime));
+      //console.log("selected : ", sWine)
+      //console.log("wines : ", data.filter(wine => wine.millesime === millesime))
+      //console.log("flacons : ", data.filter(wine => wine.millesime === millesime).map(wine => wine?.flacon))
+      setFlacon(data.filter(wine => wine.millesime === millesime).map(wine => wine?.flacon));
+      setSelectedFlacon(sWine?.flacon ?? 0);
     }
 
     const handleFlaconPress = (flacon: number) => {
-      setSelectedMillesime(flacon);
-      setSelectedWine(data.find(wine => wine.flacon === flacon));
+      setSelectedFlacon(flacon);
+      setSelectedWine(data.find(wine => wine.flacon === flacon && wine.millesime === selectedMillesime));
+      console.log("sWine : ", data.find(wine => wine.flacon === flacon && wine.millesime === selectedMillesime))
     }
 
     const image = regionImages.find(region => region.region === selectedWine?.region)?.image;
@@ -309,7 +327,7 @@ export default function wineDetails() {
                 {millesime
                 .map((el, index) =>
                   <TouchableOpacity key={index} 
-                style={[styles.cardYear, { backgroundColor: (selectedMillesime==el ? colors.theme_orange : colors.tertiary_blue)}]}
+                style={[styles.cardYear, { backgroundColor: (selectedMillesime===el ? colors.theme_orange : colors.tertiary_blue)}]}
                 onPress={() => handleMillesimePress(el)}
                 >
                             <Text style={styles.yearText}>{el}</Text>
@@ -321,7 +339,7 @@ export default function wineDetails() {
             {flacon
             .map((el, index) =>
               <TouchableOpacity key={index} 
-            style={[styles.cardYear, { backgroundColor: (selectedFlacon==el ? colors.theme_orange : colors.tertiary_blue)}]}
+            style={[styles.cardYear, { backgroundColor: (selectedFlacon===el ? colors.theme_orange : colors.tertiary_blue)}]}
             onPress={() => handleFlaconPress(el)}
             >
                         <Text style={styles.yearText}>{el}cl</Text>
