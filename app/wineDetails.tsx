@@ -66,9 +66,14 @@ export default function wineDetails() {
   const[take, setTake] = useState<boolean>(true);
     
     const loadWine = async () => {
-      const res = await database.getAllAsync<WineDetails>('SELECT bouteille.id_bouteille as id,bouteille.flacon as flacon, domaine.nom_d as domaine, appellation.nom_a as appellation, region.nom_r as region , bouteille.millesime as millesime, bouteille.quantite as quantite, couleur.nom_co as couleur, cepage.nom_ce as cepage,  bouteille.note as note, type.nom_t as type FROM vin, bouteille, domaine, appellation, region, couleur, cepage, type WHERE bouteille.id_vin = $idValue AND bouteille.id_vin=vin.id_vin AND vin.id_appellation=appellation.id_appellation AND vin.id_cepage=cepage.id_cepage AND vin.id_couleur=couleur.id_couleur AND vin.id_domaine=domaine.id_domaine AND vin.id_region=region.id_region AND vin.id_type=type.id_type;', {$idValue: id});
-      setData(res);
-      setWineLoaded(true);
+      try{
+        const res = await database.getAllAsync<WineDetails>('SELECT bouteille.id_bouteille as id,bouteille.flacon as flacon, domaine.nom_d as domaine, appellation.nom_a as appellation, region.nom_r as region , bouteille.millesime as millesime, bouteille.quantite as quantite, couleur.nom_co as couleur, cepage.nom_ce as cepage,  bouteille.note as note, type.nom_t as type FROM vin, bouteille, domaine, appellation, region, couleur, cepage, type WHERE bouteille.id_vin = $idValue AND bouteille.id_vin=vin.id_vin AND vin.id_appellation=appellation.id_appellation AND vin.id_cepage=cepage.id_cepage AND vin.id_couleur=couleur.id_couleur AND vin.id_domaine=domaine.id_domaine AND vin.id_region=region.id_region AND vin.id_type=type.id_type;', {$idValue: id});
+        setData(res);
+      }catch (error) {
+        console.error('Erreur lors du chargement des vins :', error);
+      }finally{
+        setWineLoaded(true);
+      }
       //console.log("data = ",res);
     }
 
@@ -115,9 +120,11 @@ export default function wineDetails() {
         const res = await database.getAllAsync<Mets>('SELECT mets.nom_m as mets FROM vin, marie, mets WHERE vin.id_vin = marie.id_vin AND mets.id_mets = marie.id_mets AND vin.id_vin=$id;', {$id: id});
         setMets(res);
         console.log("mets = ",res);
-        setMetsLoaded(true);
+        //setMetsLoaded(true);
       }catch (error) {
         console.error('Erreur lors du chargement des mets :', error);
+      }finally{
+        setMetsLoaded(true);
       }
       
     }
