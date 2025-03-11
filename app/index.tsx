@@ -9,7 +9,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import React, { useCallback, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { CepagesContext, MetsContext, MillesimeContext, RegionsContext } from "@/components/Contexts";
+import { CepagesContext, MetsContext, MillesimeContext, RegionsContext, SearchContext } from "@/components/Contexts";
 
 import { colors } from '@/constants/colors';
 import { fonts } from '@/constants/fonts';
@@ -169,6 +169,7 @@ export default function Index() {
     const [selectedMillesime, setSelectedMillesime] = useState<string[]>([]);
     const [selectedCepages, setSelectedCepages] = useState<string[]>([]);
     const [selectedMets, setSelectedMets] = useState<string[]>([]);
+    const [selectedSearch, setSelectedSearch] = useState<string[]>([]);
     /*<SafeAreaView style={{
         flex: 1,
     }}>*/
@@ -194,20 +195,26 @@ export default function Index() {
         >
         <View style={{
             height: 100,
-            flex: 0,
-            justifyContent: "flex-end",
+            paddingTop: 40,
+            padding: 10,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            position: "relative",
+            width: "100%",
             
         }}>
-            <Text style={styles.welcometitle}>Bonjour Mathys,</Text>
+            <Text style={styles.welcometitle}>Bonjour Laurent,</Text>
             <TouchableOpacity style={{
-                position: "absolute",
-                right: 20,
-                bottom: 20,
+                width: "15%",
+                justifyContent: "center",
+                alignItems: "center",
             }}
             onPress={() => router.push('./editPage')}>
-                <FontAwesome size={40} name="plus-circle"/>
+                <FontAwesome size={35} name="plus-circle"/>
             </TouchableOpacity>
         </View>
+
             <RegionsContext.Provider 
             value={{selectedFilters: selectedRegions, setSelectedFilters: setSelectedRegions}}>
                 <CepagesContext.Provider
@@ -216,9 +223,13 @@ export default function Index() {
                     value={{selectedFilters: selectedMillesime, setSelectedFilters: setSelectedMillesime}}>
                         <MetsContext.Provider
                         value={{selectedFilters: selectedMets, setSelectedFilters: setSelectedMets}}>
+                            <SearchContext.Provider
+                            value={{selectedFilters: selectedSearch, setSelectedFilters: setSelectedSearch}}>
+
 
             <FilterSection regions={regions} mets={mets} cepages={cepages} millesimes={millesime}/>
             <WineSection data={data}/>
+            </SearchContext.Provider>
             </MetsContext.Provider>
             </MillesimeContext.Provider>
             </CepagesContext.Provider>
@@ -234,6 +245,8 @@ const styles = StyleSheet.create({
     welcometitle: {
         fontSize: 30,
         fontFamily: fonts.neuebold,
-        padding: 10,
+        //padding: 10,
+        width: "85%",
+        alignItems: "center",
     },
 });

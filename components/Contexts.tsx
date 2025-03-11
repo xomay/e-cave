@@ -27,6 +27,11 @@ export const MillesimeContext = createContext<FilterContextType>({
     setSelectedFilters: () => {},
 });
 
+export const SearchContext = createContext<FilterContextType>({
+    selectedFilters: [],
+    setSelectedFilters: () => {},
+});
+
 //export const RegionsContext = createContext(null);
 /*export const MetsContext = createContext<string[]>([]);
 export const CepagesContext = createContext<string[]>([]);

@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Image, FlatList } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Image, FlatList, TextInput } from 'react-native';
 
-import { RegionsContext, MetsContext, CepagesContext, MillesimeContext } from './Contexts';
+import { RegionsContext, MetsContext, CepagesContext, MillesimeContext, SearchContext } from './Contexts';
 
 import {colors} from '@/constants/colors';
 import {fonts} from '@/constants/fonts';
@@ -144,15 +144,18 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
     const Mets = useContext(MetsContext);
     const Cepages = useContext(CepagesContext);
     const Millesime = useContext(MillesimeContext);
+    const Search = useContext(SearchContext);
 
     const selectedRegions = Regions.selectedFilters;
     const setSelectedRegions = Regions.setSelectedFilters;
     const selectedMets = Mets.selectedFilters;
     const setSelectedMets = Mets.setSelectedFilters;
     const selectedCepages = Cepages.selectedFilters;
+    const selectedSearch = Search.selectedFilters;
     const setSelectedCepages = Cepages.setSelectedFilters;
     const selectedMillesime = Millesime.selectedFilters;
     const setSelectedMillesime = Millesime.setSelectedFilters;
+    const setSelectedSearch = Search.setSelectedFilters;
 
     const regions = props.regions;
     const mets = props.mets;
@@ -222,6 +225,17 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
         <View style={styles.container}>
             {/* Title */}
             {/*<Text style={styles.title}>Filtres</Text>*/}
+
+            <View style={{width: '100%', alignItems: 'center', padding: 10,}}>
+                <TextInput
+                placeholder='Rechercher votre vin'
+                value={selectedSearch.join(' ')}
+                onChangeText={(text) => setSelectedSearch(text.split(' '))}
+                style={styles.textInput}
+                autoComplete='off'
+                autoCorrect={false}
+                />
+            </View>
 
             {/* Filter Buttons */}
             <View style={styles.buttonRow}>
@@ -312,6 +326,15 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 12,
     },
+    textInput: {
+        borderWidth: 0.5,
+        padding: 10,
+        width: "100%",
+        borderRadius: 10,
+        borderColor: "slategray",
+        height: 40,
+        backgroundColor: colors.theme_white,
+      },
     buttonRow: {
         flexDirection: 'row',
         marginBottom: 16,

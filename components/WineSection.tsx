@@ -13,7 +13,7 @@ region: string;
 grape: string;
 }*/
 
-import { CepagesContext, MillesimeContext, MetsContext, RegionsContext } from './Contexts';
+import { CepagesContext, MillesimeContext, MetsContext, RegionsContext, SearchContext } from './Contexts';
 
 type Wine = {
     id: number,
@@ -95,13 +95,15 @@ export default function WineSection(props: { data: Wine[] }) {
     const {selectedFilters: selectedMillesime, setSelectedFilters: setSelectedMillesime} = useContext(MillesimeContext);
     const {selectedFilters: selectedCepages, setSelectedFilters: setSelectedCepages} = useContext(CepagesContext);
     const {selectedFilters: selectedMets, setSelectedFilters: setSelectedMets} = useContext(MetsContext);
+    const {selectedFilters: selectedSearch, setSelectedFilters: setSelectedSearch} = useContext(SearchContext);
 
     const filteredWines = props.data.filter(wine => {
         const regionMatch = selectedRegions.length === 0 || selectedRegions.includes(wine.region);
         const couleurMatch = selectedMillesime.length === 0 || selectedMillesime.includes(wine.couleur);
         const cepageMatch = selectedCepages.length === 0 || selectedCepages.includes(wine.cepage);
         const metsMatch = selectedMets.length === 0 || selectedMets.some(met => wine.mets.includes(met));
-        return regionMatch && couleurMatch && cepageMatch && metsMatch;
+        const searchMatch = selectedSearch.length === 0 || selectedSearch.some(search => wine.appellation.toLowerCase().includes(search.toLowerCase()) || wine.domaine.toLowerCase().includes(search.toLowerCase()) || wine.region.toLowerCase().includes(search.toLowerCase()) || wine.couleur.toLowerCase().includes(search.toLowerCase()) || wine.cepage.toLowerCase().includes(search.toLowerCase()));
+        return regionMatch && couleurMatch && cepageMatch && metsMatch && searchMatch;
     });
 
     return (
@@ -151,6 +153,7 @@ sectionTitle: {
     fontWeight: 'bold',
     //marginBottom: 12,
     padding: 10,
+    fontFamily: fonts.neuebold,
 },
 card: {
     width: cardWidth,

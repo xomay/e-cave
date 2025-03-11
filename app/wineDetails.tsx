@@ -390,7 +390,7 @@ export default function wineDetails() {
         <AntDesign name="plus" size={25}/>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={[styles.takeButton, {backgroundColor: take ? colors.primary_blue : colors.theme_orange}]} onPress={take ? handleTake : handleAdd}>
+      <TouchableOpacity style={[styles.takeButton, {backgroundColor: take ? colors.secondary_blue : colors.theme_orange}]} onPress={take ? handleTake : handleAdd}>
         <Text style={{color: colors.theme_white, fontSize: 15, fontFamily: fonts.sfmedium}}
         onPress={take ? handleTake : handleAdd}>{take ? "Prendre de la cave" : "Ajouter à la cave"}</Text>
       </TouchableOpacity>
@@ -492,12 +492,12 @@ const styles = StyleSheet.create({
     padding: 0,
     fontSize: 16,
     fontFamily: fonts.sfregular,
+    color: colors.primary_blue,
   },
   text: {
     padding: 0,
     fontSize: 30,
     fontFamily: fonts.sfbold,
-    color : colors.primary_blue,
     marginBottom: 15,
     marginTop: 3,
   },

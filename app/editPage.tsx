@@ -910,7 +910,7 @@ export default function editPage() {
               const res = database.getFirstSync('SELECT * FROM bouteille WHERE id_vin=138;')
               console.log(res)
               /*router.back()*/}}
-            style={[styles.buttonCancel, { backgroundColor: "red" }]}
+            style={[styles.buttonCancel, { backgroundColor: colors.theme_orange }]}
             >
             <AntDesign name="close" size={30} color={"white"}/>
           </TouchableOpacity>
@@ -918,7 +918,7 @@ export default function editPage() {
             onPress={async () => {
               handleSave();
             }}
-            style={[styles.button, { backgroundColor: "blue" }]}
+            style={[styles.button, { backgroundColor: colors.secondary_blue }]}
           >
             <Text style={styles.buttonText}>{editMode ? "Mettre à jour la bouteille" : "Mettre à jour la cave"}</Text>
           </TouchableOpacity>
@@ -1007,7 +1007,6 @@ cardMetsText: {
     padding: 0,
     fontSize: 30,
     fontFamily: fonts.sfbold,
-    color : colors.primary_blue,
     marginBottom: 15,
     marginTop: 3,
   },
