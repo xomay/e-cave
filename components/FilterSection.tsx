@@ -116,6 +116,14 @@ export const metsImage =
     mets : "Crepes",
     image: require('@/assets/images/mets/Crepes.png'),
     },
+    {
+    mets : "Foie gras",
+    image: require('@/assets/images/mets/Foie gras.png'),
+    },
+    {
+    mets : "undefined",
+    image: require('@/assets/images/mets/dinner.png'),
+    },
 ];
 
 type Region = {
@@ -275,7 +283,7 @@ export default function FilterSection(props: {regions: Region[], mets: Mets[], c
                     {activeBtn === 'Région' ? <Image source={regionImages.find(region => region.region === el.nom)?.image} style={styles.imageCard} resizeMode="contain"/> : null}
                     {activeBtn === 'Cépage' ? <Image source={require('@/assets/images/cepages/Assemblage.png')} style={styles.imageCard} resizeMode="contain"/> : null}
                     {activeBtn === 'Millésime' ? <Image source={millesimeImage.find(millesime => millesime.millesime === el.nom)?.image} style={styles.imageCard} resizeMode="contain"/> : null}
-                    {activeBtn === 'Mets' ? <Image source={metsImage.find(mets => mets.mets === el.nom)?.image} style={styles.imageCard} resizeMode="contain"/> : null}
+                    {activeBtn === 'Mets' ? <Image source={metsImage.find(mets => mets.mets === el.nom)?.image ?? metsImage.find(mets => mets.mets === 'undefined')?.image} style={styles.imageCard} resizeMode="contain"/> : null}
                             {activeBtn !== 'Millésime' ? <Text style={styles.cardText}>{el.nom}</Text> : null}
                         </TouchableOpacity>
                         )}

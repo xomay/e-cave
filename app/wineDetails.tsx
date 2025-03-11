@@ -119,7 +119,7 @@ export default function wineDetails() {
       try{
         const res = await database.getAllAsync<Mets>('SELECT mets.nom_m as mets FROM vin, marie, mets WHERE vin.id_vin = marie.id_vin AND mets.id_mets = marie.id_mets AND vin.id_vin=$id;', {$id: id});
         setMets(res);
-        console.log("mets = ",res);
+        //console.log("mets = ",res);
         //setMetsLoaded(true);
       }catch (error) {
         console.error('Erreur lors du chargement des mets :', error);
@@ -170,7 +170,7 @@ export default function wineDetails() {
     const handleFlaconPress = (flacon: number) => {
       setSelectedFlacon(flacon);
       setSelectedWine(data.find(wine => wine.flacon === flacon && wine.millesime === selectedMillesime));
-      console.log("sWine : ", data.find(wine => wine.flacon === flacon && wine.millesime === selectedMillesime))
+      //("sWine : ", data.find(wine => wine.flacon === flacon && wine.millesime === selectedMillesime))
     }
 
     const image = regionImages.find(region => region.region === selectedWine?.region)?.image;
